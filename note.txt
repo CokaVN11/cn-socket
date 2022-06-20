@@ -1,0 +1,34 @@
+Data format: JSON
+Need:
+    - Database
+    - GUI (optional)
+Data:
+    Booking data
+    - Time user finish booking. (timestamp)
+    - username
+    - id of hotel
+    - type of room
+    - arrival day
+    - departure day
+    - note
+    User data:
+    - username (>= 5 char: a-z, 0-9)
+    - password (>= 3 char)
+    - bank number (10 number)
+Feature:
+    1. Register
+    2. Login
+    3. Look up 
+    4. Booking
+---------------------------------
+Client side:
+    - Connect to server
+    - Get the data from server (hmmm)/ send data to server for checking
+    Or 
+    - Provide UI for user to register/login/look up/booking
+Server side:
+    - Get data from database, send to client
+    - Listen to client
+    - Store data
+    - Multithreading for multi client at the same time
+
