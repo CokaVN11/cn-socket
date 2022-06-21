@@ -33,3 +33,12 @@ Server side:
     - Multithreading for multi client at the same time
 
 Overleaf: https://www.overleaf.com/6665823383hkjckhbntzkf
+
+
+SQLite Datatypes and its Corresponding Python Types
+SQLite      |   Python
+NULL        |   None
+INTEGER     |   int
+REAL        |   float
+TEXT        |   str
+BLOB        |   bytes
