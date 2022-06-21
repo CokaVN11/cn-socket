@@ -64,6 +64,7 @@ try:
                 client.sendall(msg.encode("utf-8"))
                 if Register() == 1:
                     print("Register successfully")
+                else: print("Register fail")
         else:
             client.sendall(bytes(msg, "utf-8"))
 except KeyboardInterrupt:
