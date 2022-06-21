@@ -50,14 +50,12 @@ def isNewUser(
     with sqlConn:
         cursor = sqlConn.cursor()
         query = "SELECT * FROM " + table + " WHERE username LIKE '" + username + "'"
-        query += " AND password LIKE '" + password + "'"
-        query += " AND bank = " + str(bank)
         cursor.execute(query)
         rows = cursor.fetchall()
-        for row in rows:
-            if x in row:
-                return False
-        # insertUserIntoTable(sqlConn, table, username, password, bank)
+        row_count = len(rows)
+        if row_count:
+            return False
+        insertUserIntoTable(sqlConn, table, username, password, bank)
         return True
         # print(rows)
 
