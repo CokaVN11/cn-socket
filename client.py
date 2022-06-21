@@ -4,7 +4,7 @@ import re
 HOST = "127.198.162.1"
 PORT = 52314
 BUZSIZE = 1024
-
+special_char = re.compile("[@_!#$%^&*()<>?/\|}{~:]")
 
 def ShowMenu():
     print("MENU")
@@ -13,14 +13,25 @@ def ShowMenu():
         print(f"{i+1}. {task[i]}")
 
 
+
 def isValidUsername(username: str):
-    if (
-        len(username) < 5
-        or not re.search("[a-z]", username)
-        or not re.search("[0-9]", username)
-    ):
-        return False
-    return True
+    valid = True
+    while valid:
+        if len(username) < 5:
+            valid = False
+            break
+        elif not re.search("[a-z]", username):
+            valid = False
+            break
+        elif not re.search("[0-9]", username):
+            valid = False
+            break
+        elif special_char.search(username) or re.search("[A-Z]", username):
+            valid = False
+            break
+        else:
+            break
+    return valid
 
 
 def Register():
