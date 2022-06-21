@@ -32,3 +32,6 @@ Server side:
     - Store data
     - Multithreading for multi client at the same time
 
+
+
+// Bat terminal -> Chay server -> Split code -> Chay client
