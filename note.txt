@@ -36,4 +36,3 @@ Server side:
 
 Overleaf: https://www.overleaf.com/6665823383hkjckhbntzkf
 
-// Bat terminal -> Chay server -> Split code -> Chay client

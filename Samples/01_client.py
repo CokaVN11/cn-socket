@@ -5,6 +5,7 @@ PORT = 65432        # port is used by the server
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = (HOST, PORT)
+
 print("Client connect to server with port: " + str(PORT))
 client.connect(server_address)
 
@@ -18,3 +19,4 @@ except KeyboardInterrupt:
 finally:
     client.close()
 
+# Bat terminal -> Chay server -> Split code -> Chay client
