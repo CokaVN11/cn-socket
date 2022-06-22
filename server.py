@@ -60,7 +60,7 @@ def isNewUser(
         # print(rows)
 
 
-def Register(socConn: socket.socket()):
+def Register(socConn: socket.socket(), sqlConn: sqlite3.Connection):
     username = socConn.recv(BUZSIZE)
     socConn.sendall(username)
     password = socConn.recv(BUZSIZE)
@@ -73,13 +73,40 @@ def Register(socConn: socket.socket()):
     print("alo")
     if username and password and bank:
         print("Received")
-        with sqlite3.connect("sql.db") as sqlConn:
-            if isNewUser(sqlConn, "USER", username, password, bank):
+        if isNewUser(sqlConn, "USER", username, password, bank):
+            conn.sendall("Oke".encode("utf-8"))
+        else:
+            conn.sendall("Not oke".encode("utf-8"))
+    return (username, password, bank)
+
+
+def Login(socConn: socket.socket(), sqlConn: sqlite3.Connection):
+    username = socConn.recv(BUZSIZE)
+    socConn.sendall(username)
+    password = socConn.recv(BUZSIZE)
+    socConn.sendall(password)
+    username = username.decode("utf-8")
+    password = password.decode("utf-8")
+    if username and password:
+        print("Received")
+        cursor = sqlConn.cursor()
+        query = "SELECT * FROM " + "USER" + " WHERE username LIKE '" + username + "'"
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        if len(rows) == 0:
+            conn.sendall("Not oke".encode("utf-8"))
+            return None, None
+        for row in rows:
+            print(row)
+            if row[1] == password:
                 conn.sendall("Oke".encode("utf-8"))
             else:
                 conn.sendall("Not oke".encode("utf-8"))
-    return (username, password, bank)
+                return None, None
+        return (username, password)
 
+
+sqlConn = sqlite3.connect("sql.db")
 
 # with sqlite3.connect("sql.db") as sqlConn:
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -96,11 +123,17 @@ try:
         if choice.isdigit():
             if int(choice) == 1:
                 print("Registing")
-                username, password, bank = Register(conn)
+                username, password, bank = Register(conn, sqlConn)
                 print(username, password, bank)
+            if int(choice) == 2:
+                print("Logining")
+                username, password = Login(conn, sqlConn)
+                print(username, password)
         else:
             print(choice)
 except KeyboardInterrupt:
     conn.close()
+    sqlConn.close()
 finally:
     conn.close()
+    sqlConn.close()

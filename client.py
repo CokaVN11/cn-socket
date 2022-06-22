@@ -57,6 +57,21 @@ def Register():
     return 0
     # return (username, password, bank)
 
+def Login():
+    username = input("Username: ")
+    password = input("Password: ")
+    while not isValidUsername(username):
+        username = input("Pls type 'Username' again: ")
+    while not len(password) >= 3:
+        password = input("Pls type 'Password' again: ")
+
+    client.sendall(username.encode("utf-8"))
+    client.recv(BUZSIZE)
+    client.sendall(password.encode("utf-8"))
+    client.recv(BUZSIZE)
+    print("Send finished")
+    rep = client.recv(BUZSIZE).decode("utf-8")
+    return rep == "Oke"
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = (HOST, PORT)
@@ -76,6 +91,12 @@ try:
                 if Register() == 1:
                     print("Register successfully")
                 else: print("Register fail")
+            if int(msg) == 2:
+                print("Logining")
+                client.sendall(msg.encode("utf-8"))
+                if Login() == 1:
+                    print("Welcome to my show")
+                else: print("Get out")
         else:
             client.sendall(bytes(msg, "utf-8"))
 except KeyboardInterrupt:
