@@ -47,6 +47,8 @@ SignupEntry2 = PhotoImage(
 SignupEntry3 = PhotoImage(
     file=relative_to_assets("SignupEntry3.png"))
 
+
+
 #---------------------------- Implement Function ----------------------------#
 def clearScreen(self = window):
     for widget in self.place_slaves():
@@ -107,7 +109,8 @@ def SignupScreen():
     entry_1 = Entry(
         bd=0,
         bg="#FFFFFF",
-        highlightthickness=0
+        highlightthickness=0,
+        font=("20")
     )
     entry_1.place(
         x=258.0,
@@ -126,7 +129,8 @@ def SignupScreen():
     entry_2 = Entry(
         bd=0,
         bg="#FFFFFF",
-        highlightthickness=0
+        highlightthickness=0,
+        font=("20")
     )
     entry_2.place(
         x=258.0,
@@ -145,7 +149,8 @@ def SignupScreen():
     entry_3 = Entry(
         bd=0,
         bg="#FFFFFF",
-        highlightthickness=0
+        highlightthickness=0,
+        font=("20")
     )
     entry_3.place(
         x=258.0,
@@ -167,7 +172,7 @@ def SignupScreen():
         250.00000000000003,
         195.0,
         anchor="nw",
-        text="password",
+        text="Password",
         fill="#000000",
         font=("Roboto Bold", 16 * -1)
     )
@@ -176,7 +181,7 @@ def SignupScreen():
         250.00000000000003,
         102.0,
         anchor="nw",
-        text="username",
+        text="Username",
         fill="#000000",
         font=("Roboto Bold", 16 * -1)
     )
@@ -211,7 +216,7 @@ def LoginScreen():
         5.684341886080802e-14,
         400.0000000000001,
         500.00000000000006,
-        fill="#F2425F",
+        fill="#56BFD3",
         outline="")
 
     canvas.create_rectangle(
@@ -219,14 +224,14 @@ def LoginScreen():
         329.99999999999994,
         259.9999999999999,
         440.99999999999994,
-        fill="#F2425F",
+        fill="#56BFD3",
         outline="")
 
     canvas.create_text(
         439.9999999999999,
         448.99999999999994,
         anchor="nw",
-        text="If you dont have an account,",
+        text="If you don't have an account,",
         fill="#000000",
         font=("Roboto Bold", 18 * -1)
     )
@@ -236,23 +241,23 @@ def LoginScreen():
         416.99999999999994,
         729.9999999999999,
         418.99999999999994,
-        fill="#F2425F",
+        fill="#56BFD3",
         outline="")
 
     canvas.create_text(
-        454.9999999999999,
-        208.99999999999994,
+        454,
+        208,
         anchor="nw",
-        text="password",
+        text="Password",
         fill="#000000",
         font=("Roboto Bold", 20 * -1)
     )
 
     canvas.create_text(
-        454.9999999999999,
-        116.99999999999994,
+        454,
+        116,
         anchor="nw",
-        text="username",
+        text="Username",
         fill="#000000",
         font=("Roboto Bold", 20 * -1)
     )
@@ -320,8 +325,9 @@ def LoginScreen():
     )
     entry_1 = Entry(
         bd=0,
-        bg="#FFFFFF",
-        highlightthickness=0
+        bg="#ffffff",
+        highlightthickness=0,
+        font=("20")
     )
     entry_1.place(
         x=457.9999999999999,
@@ -337,8 +343,9 @@ def LoginScreen():
     )
     entry_2 = Entry(
         bd=0,
-        bg="#FFFFFF",
-        highlightthickness=0
+        bg="#ffffff",
+        highlightthickness=0,
+        font=("20")
     )
     entry_2.place(
         x=457.9999999999999,
@@ -351,16 +358,7 @@ def LoginScreen():
         32.999999999999886,
         192.99999999999994,
         anchor="nw",
-        text="The application provides easy and",
-        fill="#FFFFFF",
-        font=("Roboto Bold", 18 * -1)
-    )
-
-    canvas.create_text(
-        32.999999999999886,
-        213.99999999999994,
-        anchor="nw",
-        text="convenient booking service for you.",
+        text="The application provides easy and\nconvenient booking service for you.",
         fill="#FFFFFF",
         font=("Roboto Bold", 18 * -1)
     )
@@ -369,215 +367,14 @@ def LoginScreen():
         32.999999999999886,
         247.99999999999994,
         anchor="nw",
-        text="Bringing you the feeling of always having",
-        fill="#FFFFFF",
-        font=("Roboto Bold", 18 * -1)
-    )
-
-    canvas.create_text(
-        32.999999999999886,
-        268.99999999999994,
-        anchor="nw",
-        text="moments of relaxation and comfort.",
+        text="Bringing you the feeling of always having\nmoments of relaxation and comfort.",
         fill="#FFFFFF",
         font=("Roboto Bold", 18 * -1)
     )
 
 
 
-
-#------------------ Init first screen when run program ------------------#
-canvas = Canvas(
-    window,
-    bg = "#FFFFFF",
-    height = 500,
-    width = 800,
-    bd = 0,
-    highlightthickness = 0,
-    relief = "ridge"
-)
-
-canvas.place(x = 0, y = 0)
-canvas.create_rectangle(
-    1.1368683772161603e-13,
-    5.684341886080802e-14,
-    400.0000000000001,
-    500.00000000000006,
-    fill="#F2425F",
-    outline="")
-
-canvas.create_rectangle(
-    139.9999999999999,
-    329.99999999999994,
-    259.9999999999999,
-    440.99999999999994,
-    fill="#F2425F",
-    outline="")
-
-canvas.create_text(
-    439.9999999999999,
-    448.99999999999994,
-    anchor="nw",
-    text="If you dont have an account,",
-    fill="#000000",
-    font=("Roboto Bold", 18 * -1)
-)
-
-canvas.create_rectangle(
-    469.9999999999999,
-    416.99999999999994,
-    729.9999999999999,
-    418.99999999999994,
-    fill="#F2425F",
-    outline="")
-
-canvas.create_text(
-    454.9999999999999,
-    208.99999999999994,
-    anchor="nw",
-    text="password",
-    fill="#000000",
-    font=("Roboto Bold", 20 * -1)
-)
-
-canvas.create_text(
-    454.9999999999999,
-    116.99999999999994,
-    anchor="nw",
-    text="username",
-    fill="#000000",
-    font=("Roboto Bold", 20 * -1)
-)
-
-canvas.create_text(
-    454.9999999999999,
-    49.99999999999994,
-    anchor="nw",
-    text="Log in",
-    fill="#000000",
-    font=("Roboto Bold", 36 * -1)
-)
-
-canvas.create_text(
-    32.999999999999886,
-    90.99999999999994,
-    anchor="nw",
-    text="Welcome to Go2Chill",
-    fill="#FFFFFF",
-    font=("Roboto Bold", 28 * -1)
-)
-
-canvas.create_rectangle(
-    32.999999999999886,
-    150.99999999999994,
-    192.9999999999999,
-    152.99999999999994,
-    fill="#FFFFFF",
-    outline="")
-
-
-# BUTTON "CREATE ONE"
-button_1 = Button(
-    image=LoginCreateOneButton,
-    borderwidth=0,
-    highlightthickness=0,
-    command=SignupScreen,
-    relief="flat"
-)
-button_1.place(
-    x=665.9999999999999,
-    y=442.99999999999994,
-    width=96.0,
-    height=34.0
-)
-
-# BUTTON "LOG IN"
-button_2 = Button(
-    image=LoginButton,
-    borderwidth=0,
-    highlightthickness=0,
-    command=lambda:print("Hehe Submit"),
-    relief="flat"
-)
-button_2.place(
-    x=449.9999999999999,
-    y=329.99999999999994,
-    width=300.0,
-    height=50.0
-)
-
-# ENTRY USERNAME
-entry_bg_1 = canvas.create_image(
-    599.9999999999999,
-    261.99999999999994,
-    image=LoginEntry1
-)
-entry_1 = Entry(
-    bd=0,
-    bg="#FFFFFF",
-    highlightthickness=0
-)
-entry_1.place(
-    x=457.9999999999999,
-    y=244,
-    width=284.0,
-    height=36.0
-)
-
-# ENTRY PASSWORD
-entry_bg_2 = canvas.create_image(
-    599.9999999999999,
-    167.99999999999994,
-    image=LoginEntry2
-)
-entry_2 = Entry(
-    bd=0,
-    bg="#FFFFFF",
-    highlightthickness=0
-)
-entry_2.place(
-    x=457.9999999999999,
-    y=150,
-    width=284.0,
-    height=36.0
-)
-
-canvas.create_text(
-    32.999999999999886,
-    192.99999999999994,
-    anchor="nw",
-    text="The application provides easy and",
-    fill="#FFFFFF",
-    font=("Roboto Bold", 18 * -1)
-)
-
-canvas.create_text(
-    32.999999999999886,
-    213.99999999999994,
-    anchor="nw",
-    text="convenient booking service for you.",
-    fill="#FFFFFF",
-    font=("Roboto Bold", 18 * -1)
-)
-
-canvas.create_text(
-    32.999999999999886,
-    247.99999999999994,
-    anchor="nw",
-    text="Bringing you the feeling of always having",
-    fill="#FFFFFF",
-    font=("Roboto Bold", 18 * -1)
-)
-
-canvas.create_text(
-    32.999999999999886,
-    268.99999999999994,
-    anchor="nw",
-    text="moments of relaxation and comfort.",
-    fill="#FFFFFF",
-    font=("Roboto Bold", 18 * -1)
-)
-
+LoginScreen()
 
 
 
