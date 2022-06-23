@@ -41,7 +41,7 @@ def handle_client(client):  # Takes client socket as argument.
     name = client.recv(BUFSIZ).decode("utf8")
     
     # Gửi thông báo hướng dẫn khác tới bên đó
-    #          Welcome %s với s là biến nội suy name để ở cuối
+    # Welcome %s với s là biến nội suy name để ở cuối
     welcome = 'Welcome %s! If you ever want to quit, type {quit} to exit.' % name
     client.send(bytes(welcome, "utf8"))
 
