@@ -11,7 +11,7 @@ special_char = re.compile("[@_!#$%^&*()<>?/\|}{~:]")
 def deleteAll(table: str):
     try:
         sqlConn = sql.connect("sql.db")
-        del_cmd = "DELETE FROM " +table+ ";"
+        del_cmd = "DELETE FROM " + table + ";"
         cursor = sqlConn.cursor()
 
         cursor.execute(del_cmd)
@@ -24,6 +24,7 @@ def deleteAll(table: str):
             sqlConn.close()
             print("SQLite connection closed")
 
+
 def deleteUsernameInvalid(table: str):
     try:
         sqlConn = sql.connect("sql.db")
@@ -34,7 +35,8 @@ def deleteUsernameInvalid(table: str):
         for row in rows:
             if not isValidUsername(row[1]):
                 print(row[0])
-                del_cmd = "DELETE FROM " + table + " WHERE rowid = "+ str(row[0])
+                del_cmd = "DELETE FROM " + table + \
+                    " WHERE rowid = " + str(row[0])
                 cursor.execute(del_cmd)
         sqlConn.commit()
 
@@ -44,6 +46,7 @@ def deleteUsernameInvalid(table: str):
         if sqlConn:
             sqlConn.close()
             print("SQLite connection closed")
+
 
 def insertIntoTable(name: str, password: str, bank: int):
     try:
@@ -117,6 +120,20 @@ def genFakePassWord(length: int):
     return "".join(password)
 
 
+def print_format_table():
+    """
+    prints table of formatted text format options
+    """
+    for style in range(8):
+        for fg in range(30, 38):
+            s1 = ""
+            for bg in range(40, 48):
+                format = ";".join([str(style), str(fg), str(bg)])
+                s1 += "\x1b[%sm %s \x1b[0m" % (format, format)
+            print(s1)
+        print("\n")
+
+
 # deleteAll()
 # Generate data
 # fake = faker.Faker()
@@ -173,5 +190,5 @@ def genFakePassWord(length: int):
 # print(re.search("[0-9]", username))
 # print(special_char.search(username))
 # print(isValidUsername(username))
-# deleteAll("USER")
-deleteUsernameInvalid("USER")
+deleteAll("USER")
+# print_format_table()
