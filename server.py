@@ -1,36 +1,25 @@
 import socket
 import sqlite3
 import string
+import threading
 
-HOST = "127.198.162.1"
-PORT = 52314
-BUFSIZE = 1024
+IP = socket.gethostbyname(socket.gethostname())
+PORT = 27276
+ADDR = (IP, PORT)
+BUFSIZ = 1024
 FORMAT = "utf-8"
+QUIT_MSG = "!quit"
 
 
-def send_safe(conn: socket.socket(), msg):
-    """Send msg to the host and receive the response
-
-    Args:
-        conn (socket.socket): socket to the host
-        msg (str): message to send
-    """
+def send_s(conn: socket.socket(), msg: str):
     if conn:
         conn.sendall(msg.encode(FORMAT))
-        conn.recv(BUFSIZE)
+        conn.recv(BUFSIZ)
 
 
-def recv_safe(conn: socket.socket()):
-    """Receive msg from the host and send back
-
-    Args:
-        conn (socket.socket): socket to the host
-
-    Returns:
-        str or None: message received
-    """
+def recv_s(conn: socket.socket()):
     if conn:
-        msg = conn.recv(BUFSIZE).decode(FORMAT)
+        msg = conn.recv(BUFSIZ).decode(FORMAT)
         conn.sendall(msg.encode(FORMAT))
         return msg
     else:
@@ -47,173 +36,152 @@ def isExistTable(sqlConn: sqlite3.Connection, table: str):
     :type table: str
     :return: A boolean value.
     """
-    with sqlConn:
-        cursor = sqlConn.cursor()
+    if sqlConn:
+        cx = sqlConn.cursor()
         # get name of table in database
-        cursor.execute("SELECT name FROM sqlite_master WHERE type = 'table';")
+        cx.execute("SELECT name FROM sqlite_master WHERE type = 'table';")
 
-        rows = cursor.fetchall()
+        rows = cx.fetchall()
         for row in rows:
             # convert tuple to string
             table_name = "".join(row)
-            print(table_name)
+            print(f"Table from SQL database: {table_name}")
             if table_name == table:
                 return True
         return False
+    else:
+        return False
 
 
-def insertUserIntoTable(
-    sqlConn: sqlite3.Connection, table: str, name: str, password: str, bank: int
-):
-    """
-    It creates a table if it doesn't exist, then inserts a row into the table
-
-    :param sqlConn: sqlite3.Connection
-    :type sqlConn: sqlite3.Connection
-    :param table: The name of the table you want to insert the user into
-    :type table: str
-    :param name: str
-    :type name: str
-    :param password: str
-    :type password: str
-    :param bank: int
-    :type bank: int
-    """
-    with sqlConn:
-        cursor = sqlConn.cursor()
-        print("Connect successfully")
-        create_table = (
-            "CREATE TABLE IF NOT EXISTS "
-            + table
-            + "(username TEXT, password TEXT, bank INTEGER)"
-        )
-        cursor.execute(create_table)
-
-        data = (name, password, bank)
-        insert_cmd = "INSERT INTO " + table + " VALUES (?, ?, ?)"
-        cursor.execute(insert_cmd, data)
-        sqlConn.commit()
-
-        cursor.close()
-
-
-def isNewUser(
-    sqlConn: sqlite3.Connection, table: str, username: str, password: str, bank: int
-):
-    """
-    If the username is not in the table, add it to the table
-
-    :param sqlConn: sqlite3.Connection
-    :type sqlConn: sqlite3.Connection
-    :param table: the table name
-    :type table: str
-    :param username: str
-    :type username: str
-    :param password: str
-    :type password: str
-    :param bank: int
-    :type bank: int
-    :return: A boolean value.
-    """
-    with sqlConn:
-        cursor = sqlConn.cursor()
+def isNewUser(sqlConn: sqlite3.Connection, table: str, username: str, password: str, bank: int):
+    if sqlConn:
+        cx = sqlConn.cursor()
         query = "SELECT * FROM " + table + " WHERE username LIKE '" + username + "'"
-        cursor.execute(query)
-        rows = cursor.fetchall()
+        cx.execute(query)
+        rows = cx.fetchall()
         row_count = len(rows)
         if row_count:
             return False
-        insertUserIntoTable(sqlConn, table, username, password, bank)
         return True
-        # print(rows)
+    else:
+        return None
 
 
-def Register(socConn: socket.socket(), sqlConn: sqlite3.Connection):
-    """
-    It receives a username, password and bank from the client, and then checks if the user is new or
-    not. If the user is new, it sends "Oke" to the client, otherwise it sends "Not oke".
+def insertUserIntoTable(sqlConn: sqlite3.Connection, table: str, name: str, password: str, bank: int):
+    if sqlConn:
+        cx = sqlConn.cursor()
+        create_table = "CREATE TABLE IF NOT EXISTS " + table + \
+            "(username TEXT, password TEXT, bank INTEGER)"
 
-    :param socConn: socket.socket()
-    :type socConn: socket.socket()
-    :param sqlConn: sqlite3.Connection
-    :type sqlConn: sqlite3.Connection
-    :return: The username, password, and bank.
-    """
-    username = recv_safe(conn)
-    password = recv_safe(conn)
-    bank = int(recv_safe(conn))
+        cx.execute(create_table)
 
-    print("alo")
-    if username and password and bank:
-        print("Received")
-        if isNewUser(sqlConn, "USER", username, password, bank):
-            conn.sendall("Oke".encode("utf-8"))
-        else:
-            conn.sendall("Not oke".encode("utf-8"))
-    return (username, password, bank)
+        data = (name, password, bank)
+        insert_cmd = "INSERT INTO " + table + " VALUES (?,?,?)"
+        cx.execute(insert_cmd, data)
+        sqlConn.commit()
+
+        cx.close()
 
 
-def Login(socConn: socket.socket(), sqlConn: sqlite3.Connection):
-    """
-    It receives a username and password from the client, checks if the username exists in the database,
-    and if it does, it checks if the password is correct. If it is, it sends "Oke" to the client,
-    otherwise it sends "Not oke".
-
-    :param socConn: socket.socket()
-    :type socConn: socket.socket()
-    :param sqlConn: sqlite3.Connection
-    :type sqlConn: sqlite3.Connection
-    :return: The username and password of the user that is logged in.
-    """
-    username = recv_safe(conn)
-    password = recv_safe(conn)
-    if username and password:
-        print("Received")
-        cursor = sqlConn.cursor()
+def Login(conn, addr, sqlConn: sqlite3.Connection):
+    if conn:
+        username = recv_s(conn)
+        password = recv_s(conn)
+        if username and password:
+            print(f"[SERVER] Received from {addr}")
+            print(f"[{addr}] username = {username}, password = {password}")
+        cx = sqlConn.cursor()
         query = "SELECT * FROM " + "USER" + " WHERE username LIKE '" + username + "'"
-        cursor.execute(query)
-        rows = cursor.fetchall()
+        cx.execute(query)
+        rows = cx.fetchall()
         if len(rows) == 0:
-            conn.sendall("Not oke".encode("utf-8"))
-            return None, None
+            send_s(conn, "Not oke")
         for row in rows:
-            print(row)
             if row[1] == password:
-                conn.sendall("Oke".encode("utf-8"))
+                send_s(conn, "Oke")
             else:
-                conn.sendall("Not oke".encode("utf-8"))
-                return None, None
-        return (username, password)
+                send_s(conn, "Not oke")
+        cx.close()
 
 
-sqlConn = sqlite3.connect("sql.db")
+def Register(conn, addr, sqlConn: sqlite3.Connection):
+    if conn:
+        username = recv_s(conn)
+        password = recv_s(conn)
+        bank = int(recv_s(conn))
+        if username and password and bank:
+            print(f"[SERVER] Received from {addr}")
+            print(
+                f"[{addr}] username = {username}, password = {password}, bank number = {bank}")
+            if isNewUser(sqlConn, "USER", username, password, bank):
+                insertUserIntoTable(sqlConn, "USER", username, password, bank)
+                send_s(conn, "Oke")
+            else:
+                send_s(conn, "Not oke")
 
-# with sqlite3.connect("sql.db") as sqlConn:
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = (HOST, PORT)
-s.bind(server_address)
-s.listen(1)  # 1 is number of client want to connect to server
-print("Waiting for connection")
-try:
-    conn, addr = s.accept()
-    print(f"Connected by {addr}")
-    choice = None
-    while choice != "{quit}":
-        choice = conn.recv(1024).decode("utf-8")
-        if choice.isdigit():
-            if int(choice) == 1:
-                print("Registing")
-                username, password, bank = Register(conn, sqlConn)
-                print(username, password, bank)
-            if int(choice) == 2:
-                print("Logining")
-                username, password = Login(conn, sqlConn)
-                print(username, password)
+
+def handle_client(conn, addr, sqlConn: sqlite3.Connection):
+    """
+    It handle client
+
+    :param conn: The connection object
+    :param addr: The address of the client
+    """
+    print(f"[NEW CONNECTION] {addr} connected.")
+
+    connected = True
+    while connected:
+        msg = recv_s(conn)
+        if msg == QUIT_MSG:
+            print(f"[{addr}] Getting out of server")
+            connected = False
         else:
-            print(choice)
-except KeyboardInterrupt:
+            if msg.isdigit():
+                if int(msg) == 1:
+                    print(f"[{addr}] Registing")
+                    Register(conn, addr, sqlConn)
+                    # send_s(conn, "Registing")
+                elif int(msg) == 2:
+                    print(f"[{addr}] Loginning")
+                    Login(conn, addr, sqlConn)
+                    # send_s(conn, "Loginning")
+            else:
+                print(f"[{addr}] sent {msg}")
+                send_s(conn, msg)
+
     conn.close()
-    sqlConn.close()
-finally:
-    conn.close()
-    sqlConn.close()
+
+
+def accept_incoming_connection(server):
+    """
+    It accepts incoming connections and creates a new thread for each connection
+
+    :param server: The server object
+    """
+    while True:
+        conn, addr = server.accept()
+        sqlConn = sqlite3.connect("sql.db", check_same_thread=False)
+        thread = threading.Thread(
+            target=handle_client, args=(conn, addr, sqlConn))
+
+        thread.start()
+        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 2}")
+
+
+def main():
+    print("[STARTING] Server is starting...")
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind(ADDR)
+    server.listen()
+    print(f"[LISTENING] Server is listening on {IP}:{PORT}")
+
+    accept_thread = threading.Thread(
+        target=accept_incoming_connection, args=(server,))
+
+    accept_thread.start()
+    accept_thread.join()  # prevent another thread start when it not finished
+    server.close()
+
+
+if __name__ == "__main__":
+    main()

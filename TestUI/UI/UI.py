@@ -97,6 +97,8 @@ def LoginScreen():
         width = 284.0,
         height = EntryHeight
     )
+    entry_1 = Entry(bd=0, bg="#FFFFFF", highlightthickness=0)
+    entry_1.place(x=457.9999999999999, y=244, width=284.0, height=36.0)
 
     #---------- Entry Password
     LoginEntry2Background = canvas.create_image(
@@ -114,6 +116,8 @@ def LoginScreen():
         width = 284.0,
         height = EntryHeight
     )
+    entry_2 = Entry(bd=0, bg="#FFFFFF", highlightthickness=0)
+    entry_2.place(x=457.9999999999999, y=150, width=284.0, height=36.0)
 
 
 def SignupScreen():

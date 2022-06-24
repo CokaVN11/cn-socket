@@ -1,46 +1,32 @@
 import socket
 import re
 
-HOST = "127.198.162.1"
-PORT = 52314
-BUZSIZE = 1024
+IP = socket.gethostbyname(socket.gethostname())
+PORT = 27276
+ADDR = (IP, PORT)
+BUFSIZ = 1024
 FORMAT = "utf-8"
-special_char = re.compile("[@_!#$%^&*()<>?/\|}{~:]")
+QUIT_MSG = "!quit"
+SPEC_CHAR = re.compile("[@_!#$%^&*()<>?/\|}{~:]")
 
-def send_safe(conn: socket.socket(), msg):
-    """
-    If the connection is valid, send the message and wait for a response
-    
-    :param conn: socket.socket()
-    :type conn: socket.socket()
-    :param msg: the message to send
-    """
+
+def send_s(conn: socket.socket(), msg: str):
     if conn:
         conn.sendall(msg.encode(FORMAT))
-        conn.recv(BUFSIZE)
+        conn.recv(BUFSIZ)
 
-def recv_safe(conn: socket.socket()):
-    """
-    It receives a message from the client, sends it back to the client, and returns the message
-    
-    :param conn: socket.socket()
-    :type conn: socket.socket()
-    :return: The message that was sent to the server.
-    """
+
+def recv_s(conn: socket.socket()):
     if conn:
-        msg = conn.recv(BUFSIZE).decode(FORMAT)
+        msg = conn.recv(BUFSIZ).decode(FORMAT)
         conn.sendall(msg.encode(FORMAT))
         return msg
-    else: return None
+    else:
+        return None
 
-def ShowMenu():
-    print("MENU")
-    task = ["Register", "Login", "Booking", "Look up", "Cancel"]
-    for i in range(len(task)):
-        print(f"{i+1}. {task[i]}")
 
 def isValidUsername(username: str):
-    """ Checking whether username is valid or not."""
+    """Checking whether username is valid or not."""
     valid: bool = True
     while valid:
         if len(username) < 5:
@@ -52,7 +38,7 @@ def isValidUsername(username: str):
         elif not re.search("[0-9]", username):
             valid = False
             break
-        elif special_char.search(username) or re.search("[A-Z]", username):
+        elif SPEC_CHAR.search(username) or re.search("[A-Z]", username):
             valid = False
             break
         else:
@@ -60,77 +46,83 @@ def isValidUsername(username: str):
     return valid
 
 
-def Register():
-    """
-    It asks for a username, password and bank number, then it checks if the username, password, bank number is valid
-    If all of these are true, it sends the username, password and bank number to the server.
-    :return: a boolean value
-    """
+def ShowMenu():
+    print("\x1b[1;34;40m" + "------MENU------" + "\x1b[0m")
+    task = ["Register", "Login", "Booking", "Look up", "Cancel"]
+    for i in range(len(task)):
+        print(f"{i+1}. {task[i]}")
+    print("----------------")
+
+def Register(client):
     username = input("Username: ")
     password = input("Password: ")
     bank = int(input("Bank number: "))
-    isValidUsername(username)
     while not isValidUsername(username):
         username = input("Pls type 'Username' again: ")
     while not len(password) >= 3:
         password = input("Pls type 'Password' again: ")
     while not 1000000000 <= bank <= 10000000000:
         bank = int(input("Pls type 'Bank number' again: "))
-    send_safe(client, username)
-    send_safe(client, password)
-    send_safe(client, str(bank))
-    print("Send finished")
-    rep = recv_safe(client)
-    if rep == "Oke":
-        return 1
-    return 0
-    # return (username, password, bank)
+    send_s(client, username)
+    send_s(client, password)
+    send_s(client, str(bank))
+    print("[CLIENT] Send finished")
+    msg = recv_s(client)
+    if msg == "Oke":
+        print("[Client] Register successfully")
+    else: print("[CLIENT] You are a dump shit")
 
-def Login():
-    """
-    It asks for a username and password, and then sends them to the server
-    :return: A boolean value
-    """
+
+def Login(client):
     username = input("Username: ")
     password = input("Password: ")
     while not isValidUsername(username):
-        username = input("Pls type 'Username' again: ")
+        username = input("Please type 'Username' again: ")
     while not len(password) >= 3:
-        password = input("Pls type 'Password' again: ")
+        password = input("Please type 'Password' again: ")
 
-    send_safe(client, username)
-    send_safe(client, password)
-    print("Send finished")
-    rep = client.recv(BUZSIZE).decode("utf-8")
-    return rep == "Oke"
+    send_s(client, username)
+    send_s(client, password)
+    print("[CLIENT] Send finished")
+    msg = recv_s(client)
+    if msg == "Oke": 
+        print("[CLIENT] Login successfully")
+    else:
+        print("[CLIENT] You are a dump shit")
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = (HOST, PORT)
-print("CLIENT SIDE\n")
-print(f"Connecting {server_address}")
-client.connect(server_address)
 
-try:
-    ShowMenu()
-    msg = ""
-    while msg != "{quit}":
-        msg = input("Client: ")
-        if msg.isdigit():
-            if int(msg) == 1:
-                print("Registing")
-                client.sendall(msg.encode("utf-8"))
-                if Register() == 1:
-                    print("Register successfully")
-                else: print("Register fail")
-            if int(msg) == 2:
-                print("Logining")
-                client.sendall(msg.encode("utf-8"))
-                if Login() == 1:
-                    print("Welcome to my show")
-                else: print("Get out")
+def Menu(client, choice):
+    if type(choice) != int:
+        choice = int(choice)
+    if choice == 1:
+        Register(client)
+    elif choice == 2:
+        Login(client)
+
+
+def main():
+    print("\x1b[1;32;40m" + "CLIENT SIDE" + "\x1b[0m")
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect(ADDR)
+    print(f"[CONNECTED] Client connected to server at {IP}:{PORT}")
+
+    connected = True
+    while connected:
+        ShowMenu()
+        msg = input("> ")
+
+        send_s(client, msg)
+
+        if msg == QUIT_MSG:
+            connected = False
         else:
-            client.sendall(bytes(msg, "utf-8"))
-except KeyboardInterrupt:
+            if msg.isdigit():
+                Menu(client, msg)
+            else: 
+                msg = recv_s(client)
+                print(f"[SERVER] {msg}")
     client.close()
-finally:
-    client.close()
+
+
+if __name__ == "__main__":
+    main()
