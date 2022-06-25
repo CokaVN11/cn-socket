@@ -1,5 +1,7 @@
 
+from email import message
 from tkinter import *
+from tkinter import messagebox
 
 
 window = Tk()
@@ -20,10 +22,10 @@ Login_Entry = PhotoImage(file = "./assets/Login_Entry.png")
 Login_LoginButton = PhotoImage(file = "./assets/Login_LoginButton.png")
 Login_SignupButton = PhotoImage(file = "./assets/Login_SignupButton.png")
 
-Signup_Background = PhotoImage(file = f"./assets/Signup_Background.png")
-Signup_BackButton = PhotoImage(file = f"./assets/Signup_BackButton.png")
-Signup_SubmitButton = PhotoImage(file = f"./assets/Signup_SubmitButton.png")
-Signup_Entry = PhotoImage(file = f"./assets/Signup_Entry.png")
+Signup_Background = PhotoImage(file = "./assets/Signup_Background.png")
+Signup_BackButton = PhotoImage(file = "./assets/Signup_BackButton.png")
+Signup_SubmitButton = PhotoImage(file = "./assets/Signup_SubmitButton.png")
+Signup_Entry = PhotoImage(file = "./assets/Signup_Entry.png")
 
 
 #==================== Implement Function ====================#
@@ -34,6 +36,11 @@ def clearScreen(self = window):
 
 def btn_clicked():
     print("Button Clicked")
+
+
+
+
+
 
 def LoginScreen():
     clearScreen()
@@ -97,8 +104,6 @@ def LoginScreen():
         width = 284.0,
         height = EntryHeight
     )
-    entry_1 = Entry(bd=0, bg="#FFFFFF", highlightthickness=0)
-    entry_1.place(x=457.9999999999999, y=244, width=284.0, height=36.0)
 
     #---------- Entry Password
     LoginEntry2Background = canvas.create_image(
@@ -116,8 +121,6 @@ def LoginScreen():
         width = 284.0,
         height = EntryHeight
     )
-    entry_2 = Entry(bd=0, bg="#FFFFFF", highlightthickness=0)
-    entry_2.place(x=457.9999999999999, y=150, width=284.0, height=36.0)
 
 
 def SignupScreen():
@@ -153,19 +156,6 @@ def SignupScreen():
         height = 34
     )
 
-    #---------- BUTTON "Submit"
-    SignupSubmitButton = Button(
-        image = Signup_SubmitButton,
-        borderwidth = 0,
-        highlightthickness = 0,
-        command = btn_clicked,
-        relief = "flat"
-    ).place(
-        x = 292, y = 395,
-        width = 216,
-        height = 50
-    )
-
     #---------- Entry Username
     SignupEntry1Background = canvas.create_image(
         400.0, 148.0,
@@ -177,7 +167,8 @@ def SignupScreen():
         bg = "#ffffff",
         highlightthickness = 0,
         font=("20")
-    ).place(
+    )
+    SignupEntry1.place(
         x = 258.0, y = 123 + EntryDiscrepancy,
         width = 284.0,
         height = EntryHeight
@@ -194,7 +185,8 @@ def SignupScreen():
         bg = "#ffffff",
         highlightthickness = 0,
         font=("20")
-    ).place(
+    )
+    SignupEntry2.place(
         x = 258.0, y = 217 + EntryDiscrepancy,
         width = 284.0,
         height = EntryHeight
@@ -211,12 +203,61 @@ def SignupScreen():
         bg = "#ffffff",
         highlightthickness = 0,
         font=("20")
-    ).place(
+    )
+    SignupEntry3.place(
         x = 258.0, y = 311 + EntryDiscrepancy,
         width = 284.0,
         height = EntryHeight
     )
 
+    def checkFieldValid(typeCheck, userInput):
+        if typeCheck == "username":
+            if len(userInput) < 5:
+                messagebox.showinfo("Invalid input", "Username must have at least 5 characters and contain letters (a-z), numbers (0-9)")
+                return False
+            elif (all(c.isnumeric() or c.islower() for c in userInput)) == False:
+                messagebox.showinfo("Invalid input", "Username must have at least 5 characters and contain letters (a-z), numbers (0-9)")
+                return False
+
+        elif typeCheck == "password":
+            if len(userInput) < 3:
+                messagebox.showinfo("Invalid input", "Password must have at least 3 characters")
+                return False
+
+        elif typeCheck == "bank":
+            if len(userInput) != 10:
+                messagebox.showinfo("Invalid input", "Bank account must have 10 characters and contain numbers (0-9)")
+                return False
+            elif userInput.isnumeric() == False:
+                messagebox.showinfo("Invalid input", "Bank account must have 10 characters and contain numbers (0-9)")
+                return False
+        
+    def submitForm():
+        usernameInput = SignupEntry1.get()
+        passwordInput = SignupEntry2.get()
+        bankInput = SignupEntry3.get()
+        print (usernameInput, passwordInput, bankInput)
+        if checkFieldValid("username", usernameInput) == False:
+            return
+        if checkFieldValid("password", passwordInput) == False:
+            return
+        if checkFieldValid("bank", bankInput) == False:
+            return
+
+        print("Submitted !")
+
+    #---------- BUTTON "Submit"
+    SignupSubmitButton = Button(
+        image = Signup_SubmitButton,
+        borderwidth = 0,
+        highlightthickness = 0,
+        command = submitForm,
+        relief = "flat"
+    ).place(
+        x = 292, y = 395,
+        width = 216,
+        height = 50
+    )
 
 LoginScreen()
 
