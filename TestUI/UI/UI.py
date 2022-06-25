@@ -34,13 +34,6 @@ def clearScreen(self = window):
     for widget in self.place_slaves():
         widget.place_forget()
 
-def btn_clicked():
-    print("Button Clicked")
-
-
-
-
-
 
 def LoginScreen():
     clearScreen()
@@ -62,12 +55,53 @@ def LoginScreen():
         image=Login_Background
     )
 
+    #---------- Entry Username
+    LoginEntry1Background = canvas.create_image(
+        600.0, 166.0,
+        image = Login_Entry
+    )
+
+    LoginEntry1 = Entry(
+        bd = 0,
+        bg = "#ffffff",
+        highlightthickness = 0,
+        font=("20")
+    )
+    LoginEntry1.place(
+        x = 458.0, y = 141 + EntryDiscrepancy,
+        width = 284.0,
+        height = EntryHeight
+    )
+
+    #---------- Entry Password
+    LoginEntry2Background = canvas.create_image(
+        600.0, 260.0,
+        image = Login_Entry
+    )
+
+    LoginEntry2 = Entry(
+        bd = 0,
+        bg = "#ffffff",
+        highlightthickness = 0,
+        font=("20")
+    )
+    LoginEntry2.place(
+        x = 458.0, y = 235 + EntryDiscrepancy,
+        width = 284.0,
+        height = EntryHeight
+    )
+
+    def submitLogin():
+        usernameInput = LoginEntry1.get()
+        passwordInput = LoginEntry2.get()
+        print(usernameInput, passwordInput)
+
     #---------- BUTTON "Log in"
     LoginLoginButton = Button(
         image = Login_LoginButton,
         borderwidth = 0,
         highlightthickness = 0,
-        command = btn_clicked,
+        command = submitLogin,
         relief = "flat"
     ).place(
         x = 450, y = 326,
@@ -88,39 +122,6 @@ def LoginScreen():
         height = 34
     )
 
-    #---------- Entry Username
-    LoginEntry1Background = canvas.create_image(
-        600.0, 166.0,
-        image = Login_Entry
-    )
-
-    LoginEntry1 = Entry(
-        bd = 0,
-        bg = "#ffffff",
-        highlightthickness = 0,
-        font=("20")
-    ).place(
-        x = 458.0, y = 141 + EntryDiscrepancy,
-        width = 284.0,
-        height = EntryHeight
-    )
-
-    #---------- Entry Password
-    LoginEntry2Background = canvas.create_image(
-        600.0, 260.0,
-        image = Login_Entry
-    )
-
-    LoginEntry2 = Entry(
-        bd = 0,
-        bg = "#ffffff",
-        highlightthickness = 0,
-        font=("20")
-    ).place(
-        x = 458.0, y = 235 + EntryDiscrepancy,
-        width = 284.0,
-        height = EntryHeight
-    )
 
 
 def SignupScreen():

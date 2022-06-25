@@ -2,20 +2,37 @@ Figma LOGIN : https://www.figma.com/file/HKPIFVwHe08GfnmVUKekux/Login?node-id=0%
 
 Figma SIGNUP : https://www.figma.com/file/42jd7Ij7mg6ILffuLKsljV/Signup?node-id=0%3A1
 
+Figma MENU : https://www.figma.com/file/d8WuQj0U11dsuZfcOj08Ju/Menu?node-id=0%3A1
+
 Figma Token : figd_lTLEQ13ESwefWY6FuFOliUkuOSWGnszzPIByimgh
 
-Generate folder UI : tkdesigner [$FILE_URL] [$FIGMA_TOKEN]
-
-Log in:
-tkdesigner "https://www.figma.com/file/HKPIFVwHe08GfnmVUKekux/Login?node-id=0%3A1" figd_lTLEQ13ESwefWY6FuFOliUkuOSWGnszzPIByimgh
-
-Sign up:
-tkdesigner "https://www.figma.com/file/42jd7Ij7mg6ILffuLKsljV/Signup?node-id=0%3A1" figd_lTLEQ13ESwefWY6FuFOliUkuOSWGnszzPIByimgh
 
 // Primary color : #56BFD3
 
 TODO :
     - Get input field
-    - Menu
     - Cua so Thong bao
+    - Menu
     - Tim hinh (6 hotels x 3 rooms)
+
+
+Menu :
+    - Danh sách các khách sạn
+    - thông tin đặt phòng - Nếu thực hiện chức năng STT 7 (lọai bỏ các booking trong quá khứ)
+    - Guide
+
+   (- Xem thông tin cá nhân )
+   (- Chỉnh sửa thông tin cá nhân )
+    - Đăng xuất
+
+Menu :
+1 ----> List of hotels
+2 ----> Booking information
+3 ----> Look up
+4 ----> Booking room"		
+		
+		
+		
+		
+		
+
