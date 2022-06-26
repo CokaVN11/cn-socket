@@ -4,16 +4,15 @@ Figma SIGNUP : https://www.figma.com/file/42jd7Ij7mg6ILffuLKsljV/Signup?node-id=
 
 Figma MENU : https://www.figma.com/file/d8WuQj0U11dsuZfcOj08Ju/Menu?node-id=0%3A1
 
+Figma ListOfHotels : https://www.figma.com/file/WuXhDqARLLUJ3WVbPdC2lr/ListOfHotels?node-id=0%3A1
+
 Figma Token : figd_lTLEQ13ESwefWY6FuFOliUkuOSWGnszzPIByimgh
 
 
 // Primary color : #56BFD3
 
 TODO :
-    - Get input field
-    - Cua so Thong bao
-    - Menu
-    - Tim hinh (6 hotels x 3 rooms)
+    - Tim hinh (10 hotels x 3 rooms)
 
 
 Menu :
@@ -25,11 +24,7 @@ Menu :
    (- Chỉnh sửa thông tin cá nhân )
     - Đăng xuất
 
-Menu :
-1 ----> List of hotels
-2 ----> Booking information
-3 ----> Look up
-4 ----> Booking room"		
+
 		
 		
 		
