@@ -8,7 +8,16 @@ window = Tk()
 
 window.geometry("800x500")
 window.configure(bg = "#ffffff")
-
+canvas = Canvas(
+    window,
+    bg = "#ffffff",
+    height = 500,
+    width = 800,
+    bd = 0,
+    highlightthickness = 0,
+    relief = "ridge"
+)
+canvas.place(x = 0, y = 0)
 
 #==================== Constants Declaration ====================#
 EntryHeight = 36
@@ -126,17 +135,6 @@ def LoginScreen():
 
 def SignupScreen():
     clearScreen()
-
-    canvas = Canvas(
-        window,
-        bg = "#ffffff",
-        height = 500,
-        width = 800,
-        bd = 0,
-        highlightthickness = 0,
-        relief = "ridge"
-    )
-    canvas.place(x = 0, y = 0)
 
     # Background
     SignupBackground = canvas.create_image(

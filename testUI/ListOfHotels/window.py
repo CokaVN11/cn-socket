@@ -1,17 +1,59 @@
 from tkinter import *
 
-
 window = Tk()
 
 window.geometry("800x500")
 window.configure(bg = "#ffffff")
 
+canvas = Canvas(
+    window,
+    bg = "#ffffff",
+    height = 500,
+    width = 800,
+    bd = 0,
+    highlightthickness = 0,
+    relief = "ridge"
+)
+canvas.place(x = 0, y = 0)
+
 # Todo :
-#     - Tạo hàm tạo chữ
-#     - Tạo fake data
+#     - Tạo hàm tạo chữ /
+#     - Tạo fake data /
 #     - Tạo nút chuyển trang
 #     - Xử lí chuyển trang
 
+hotelList = [
+    {
+        "name" : "Abc",
+        "description" : "My favorite hotel",
+        "status" : "Available"
+    },
+    {
+        "name" : "Demacia",
+        "description" : "Niceeee",
+        "status" : "Available"
+    },
+    {
+        "name" : "Leaf",
+        "description" : "Lorem ipsum dolor sit amet",
+        "status" : "Available"
+    },
+    {
+        "name" : "HCMUS",
+        "description" : "I go to here everyday",
+        "status" : "Available"
+    },
+    {
+        "name" : "Noxus",
+        "description" : "Love it",
+        "status" : "Available"
+    },
+    {
+        "name" : "Figma",
+        "description" : "Hehe test long long pai pai",
+        "status" : "Available"
+    }
+]
 
 #==================== Constants Declaration ====================#
 rowHeight = 50
@@ -64,34 +106,21 @@ def renderRow(nameData, descriptionData, statusData, row):
         height = 38
     )
 
+def listOfHotelsScreen():
 
+    # Background
+    Background = canvas.create_image(
+        400.0, 225.0,
+        image=LOH_Background
+    )
 
-canvas = Canvas(
-    window,
-    bg = "#ffffff",
-    height = 500,
-    width = 800,
-    bd = 0,
-    highlightthickness = 0,
-    relief = "ridge"
-)
-canvas.place(x = 0, y = 0)
+    ###########============== Rows
+    rowIndex = 1
+    for hotel in hotelList:
+        renderRow(hotel["name"], hotel["description"], hotel["status"], rowIndex)
+        rowIndex = rowIndex + 1
 
-
-# Background
-Background = canvas.create_image(
-    400.0, 225.0,
-    image=LOH_Background
-)
-
-###########============== Rows
-renderRow("Demacia", "Hehe I haven't go to this hotel", "Availble", 1)
-renderRow("Leaf", "My favorite place", "Availble", 2)
-renderRow("HCMUS", "I go to here everyday", "Full", 3)
-renderRow("Noxus", "Lorem ipsum dolor sit amet", "Availble", 4)
-renderRow("Figma", "Lorem ipsum dolor sit amet", "Availble", 5)
-
-
+listOfHotelsScreen()
 
 
 window.resizable(False, False)

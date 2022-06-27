@@ -8,10 +8,10 @@ def btn_clicked():
 window = Tk()
 
 window.geometry("800x500")
-window.configure(bg = "#badee5")
+window.configure(bg = "#ffffff")
 canvas = Canvas(
     window,
-    bg = "#badee5",
+    bg = "#ffffff",
     height = 500,
     width = 800,
     bd = 0,
@@ -21,7 +21,7 @@ canvas.place(x = 0, y = 0)
 
 background_img = PhotoImage(file = f"background.png")
 background = canvas.create_image(
-    518.0, 249.5,
+    400.0, 249.5,
     image=background_img)
 
 img0 = PhotoImage(file = f"img0.png")
