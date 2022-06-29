@@ -36,3 +36,4 @@ Server side:
 
 Overleaf: https://www.overleaf.com/6665823383hkjckhbntzkf
 
+Show Hotel -> Show room -> Reservation

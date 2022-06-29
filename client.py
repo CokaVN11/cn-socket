@@ -1,5 +1,7 @@
 import socket
 import re
+import pickle
+import json
 
 IP = socket.gethostbyname(socket.gethostname())
 PORT = 27276
@@ -46,12 +48,21 @@ def isValidUsername(username: str):
     return valid
 
 
-def ShowMenu():
-    print("\x1b[1;34;40m" + "------MENU------" + "\x1b[0m")
-    task = ["Register", "Login", "Booking", "Look up", "Cancel"]
+def ShowLoginPage():
+    print("------MENU------")
+    task = ["Register", "Login"]
     for i in range(len(task)):
         print(f"{i+1}. {task[i]}")
     print("----------------")
+
+
+def ShowMenu():
+    print("------MENU------")
+    task = ["Show hotel", "Show had booked", "Booking guide", "Logout"]
+    for i in range(len(task)):
+        print(f"{i+1}. {task[i]}")
+    print("----------------")
+
 
 def Register(client):
     username = input("Username: ")
@@ -70,7 +81,8 @@ def Register(client):
     msg = recv_s(client)
     if msg == "Oke":
         print("[Client] Register successfully")
-    else: print("[CLIENT] You are a dump shit")
+    else:
+        print("[CLIENT] You are a dump shit")
 
 
 def Login(client):
@@ -85,40 +97,111 @@ def Login(client):
     send_s(client, password)
     print("[CLIENT] Send finished")
     msg = recv_s(client)
-    if msg == "Oke": 
+    if msg == "Oke":
         print("[CLIENT] Login successfully")
+        return username
     else:
         print("[CLIENT] You are a dump shit")
+        return None
 
 
-def Menu(client, choice):
+def ShowHotelList(client):
+    len_data = int(recv_s(client))
+    data = client.recv(len_data)
+    if data == b'empty':
+        return
+    hotels = json.loads(data)
+    first = True
+    for hotel in hotels:
+        if not first:
+            print("-"*10)
+        else:
+            first = False
+        print(f"ID: {hotel['ID']}")
+        print(f"Name: {hotel['NAME']}")
+        print(f"Description: {hotel['DESC']}")
+        print(f"Is available: {hotel['AVAILABLE']}")
+
+
+def ShowBooked(client, username):
+    send_s(client, username)
+    len_data = int(recv_s(client))
+    data = client.recv(len_data)
+    if data == b'empty':
+        print("empty")
+        return
+    reservations = json.loads(data)
+    first = True
+    for reserv in reservations:
+        if not first:
+            print("-"*10)
+        else: first = False
+        print(f"Hotel: {reserv['NAME']}")
+        print(f"Room type: {reserv['TYPE']}")
+        print(f"Arrival day: {reserv['ARRIVAL']}")
+        print(f"Departure day: {reserv['DEPARTURE']}")
+        print(f"Quantity: {reserv['QUALITY']}")
+        print(f"Total price: {reserv['TOTAL']}")
+
+
+def LoginPage(client, choice):
     if type(choice) != int:
         choice = int(choice)
+    send_s(client, str(choice))
     if choice == 1:
         Register(client)
+        return False, None
     elif choice == 2:
-        Login(client)
+        return True, Login(client)
+
+
+def Menu(client, choice, username):
+    if type(choice) != int:
+        choice = int(choice)
+    send_s(client, str(choice + 2))
+    if choice == 1:
+        print("Show hotel list")
+        ShowHotelList(client)
+        return True
+    elif choice == 2:
+        print("Do you book me")
+        ShowBooked(client, username)
+        return True
+    elif choice == 3:
+        print("How to book me")
+        return True
+    elif choice == 4:
+        print("You are so amazing")
+        return False
 
 
 def main():
-    print("\x1b[1;32;40m" + "CLIENT SIDE" + "\x1b[0m")
+    print("CLIENT SIDE")
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect(ADDR)
     print(f"[CONNECTED] Client connected to server at {IP}:{PORT}")
 
     connected = True
+    logined = False
+    username = None
     while connected:
-        ShowMenu()
+        if not logined:
+            ShowLoginPage()
+        else:
+            ShowMenu()
         msg = input("> ")
-
-        send_s(client, msg)
-
         if msg == QUIT_MSG:
+            send_s(client, msg)
             connected = False
         else:
             if msg.isdigit():
-                Menu(client, msg)
-            else: 
+                if not logined:
+                    logined, username = LoginPage(client, msg)
+                else:
+                    logined = Menu(client, msg, username)
+                    # username = None
+            else:
+                send_s(client, msg)
                 msg = recv_s(client)
                 print(f"[SERVER] {msg}")
     client.close()
