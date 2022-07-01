@@ -62,9 +62,9 @@ def LoginScreen():
 
     canvas = Canvas(
         window,
-        bg = "#ffffff",
-        height = frameHeight,
-        width = frameWidth,
+        bg = "#444444",
+        height = frameHeight-100,
+        width = frameWidth-100,
         bd = 0,
         highlightthickness = 0,
         relief = "ridge"
