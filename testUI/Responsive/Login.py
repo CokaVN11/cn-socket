@@ -63,8 +63,8 @@ def LoginScreen():
     canvas = Canvas(
         window,
         bg = "#444444",
-        height = frameHeight-100,
-        width = frameWidth-100,
+        height = frameHeight,
+        width = frameWidth,
         bd = 0,
         highlightthickness = 0,
         relief = "ridge"
@@ -116,6 +116,8 @@ def LoginScreen():
         passwordInput = LoginEntry2.get()
         print(usernameInput, passwordInput)
 
+
+
     #---------- BUTTON "Log in"
     LoginLoginButton = Button(
         image = Login_LoginButton,
@@ -128,6 +130,14 @@ def LoginScreen():
         width = convertSize(510),
         height = convertSize(84)
     )
+
+
+
+
+
+
+
+
 
     #---------- BUTTON "Create one"
     LoginSignupButton = Button(
