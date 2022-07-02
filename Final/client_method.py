@@ -1,6 +1,5 @@
 import socket
 import re
-import pickle
 import json
 
 IP = socket.gethostbyname(socket.gethostname())
@@ -9,7 +8,7 @@ ADDR = (IP, PORT)
 BUFSIZ = 1024
 FORMAT = "utf-8"
 QUIT_MSG = "!quit"
-SPEC_CHAR = re.compile("[@_!#$%^&*()<>?/\|}{~:]")
+SPEC_CHAR = re.compile("[@_!#$%^&*()<>?/|}{~:]")
 OPTIONS = {"register": "1", "login": "2"}
 
 
@@ -28,44 +27,49 @@ def recv_s(conn: socket.socket()):
         return None
 
 
-def checkFieldValid(typeCheck, userInput):
+def checkFieldValid(type_check, user_input):
     valid = True
     pop_up = ""
-    if typeCheck == "username":
-        if len(userInput) < 5:
+    if type_check == "username":
+        if len(user_input) < 5:
             pop_up = "Username must have at least 5 characters and contain letters (a-z), numbers (0-9)"
             valid = False
-        elif not re.search("[a-z]", userInput):
+        elif not re.search('[a-z]', user_input):
             pop_up = "Username must have at least 5 characters and contain letters (a-z), numbers (0-9)"
             valid = False
-        elif not re.search("[0-9]", userInput):
+        elif not re.search('[0-9]', user_input):
             pop_up = "Username must have at least 5 characters and contain letters (a-z), numbers (0-9)"
             valid = False
-        elif not SPEC_CHAR.search(userInput) or re.search("[A-Z]", userInput):
+        elif SPEC_CHAR.search(user_input) or re.search('[A-Z]', user_input):
+            # print("special char")
             pop_up = "Username must have at least 5 characters and contain letters (a-z), numbers (0-9)"
             valid = False
-    elif typeCheck == "password":
-        if len(userInput) < 3:
+    elif type_check == "password":
+        if len(user_input) < 3:
             pop_up = "Password must have at least 3 characters"
             valid = False
 
-    elif typeCheck == "bank":
-        if len(userInput) != 10:
+    elif type_check == "bank":
+        if len(user_input) != 10:
             pop_up = "Bank account must have 10 characters and contain numbers (0-9)"
             valid = False
-        elif not userInput.isnumeric():
+        elif not user_input.isnumeric():
             pop_up = "Bank account must have 10 characters and contain numbers (0-9)"
             valid = False
+    # print(valid, pop_up)
     return valid, pop_up
 
 
 def Register(client, username, password, bank):
     send_s(client, OPTIONS["register"])
     valid = True
+    cur_valid = True
     pop_up = ""
     input_dict = {"username": username, "password": password, "bank": bank}
     for field, userInput in input_dict.items():
-        valid, tmp = checkFieldValid(field, userInput)
+        cur_valid, tmp = checkFieldValid(field, userInput)
+        if not cur_valid:
+            valid = cur_valid
         if pop_up != "":
             pop_up += "\n"
         pop_up += tmp
@@ -87,12 +91,15 @@ def Register(client, username, password, bank):
 def Login(client, username, password):
     send_s(client, OPTIONS["login"])
     valid = True
+    cur_valid = True
     pop_up = ""
     valid_username = None
 
     input_dict = {"username": username, "password": password}
     for field, userInput in input_dict.items():
-        valid, tmp = checkFieldValid(field, userInput)
+        cur_valid, tmp = checkFieldValid(field, userInput)
+        if not cur_valid:
+            valid = cur_valid
         if pop_up != "":
             pop_up += "\n"
         pop_up += tmp

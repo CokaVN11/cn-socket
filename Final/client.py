@@ -1,24 +1,21 @@
 import tkinter as tk
-from tkinter import ttk
 from tkinter import messagebox
 from math import floor
 from PIL import Image, ImageTk
 from client_method import *
 
 
-@staticmethod
-def convertSize(window, originalSize):
-    return floor((window.frameWidth * originalSize) / 1600)
+def convert_size(window, original_size):
+    return floor((window.frameWidth * original_size) / 1600)
 
 
-@staticmethod
-def convertImage(window, path, originalWidth, originalHeight):
-    originalImage = Image.open(path)
-    resizedImage = originalImage.resize(
-        (convertSize(window, originalWidth), convertSize(window, originalHeight))
+def convert_image(window, path, original_width, original_height):
+    original_image = Image.open(path)
+    resized_image = original_image.resize(
+        (convert_size(window, original_width), convert_size(window, original_height))
     )
-    convertedImage = ImageTk.PhotoImage(resizedImage)
-    return convertedImage
+    converted_image = ImageTk.PhotoImage(resized_image)
+    return converted_image
 
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,12 +33,12 @@ class App(tk.Tk):
 
         self.frameWidth = floor(self.winfo_screenwidth() * self.scaleRate)
         self.frameHeight = floor(self.frameWidth * 9 / 16)
-        self.fontSize = convertSize(self, 40)
+        self.fontSize = convert_size(self, 40)
         self.resolution = f"{self.frameWidth}x{self.frameHeight}"
 
-        self.entryHeight = convertSize(self, 60)
-        self.entryFontSize = f"{convertSize(self, 80)}"
-        self.entryDiscrenpancy = convertSize(self, 12)
+        self.entryHeight = convert_size(self, 60)
+        self.entryFontSize = f"{convert_size(self, 80)}"
+        self.entryDiscrenpancy = convert_size(self, 12)
 
         # Current user
         self.username = ""
@@ -49,7 +46,7 @@ class App(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.geometry(self.resolution)
         # self.configure(bg="#ffffff")
-        self.resizable(0, 0)
+        self.resizable(False, False)
 
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=1)
@@ -58,7 +55,7 @@ class App(tk.Tk):
 
         self.frames = {}
 
-        for F in (LoginFrame, SignupFrame):
+        for F in (LoginFrame, SignupFrame, MenuFrame):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -81,14 +78,13 @@ class App(tk.Tk):
         frame.tkraise()
 
 
-class LoginFrame(ttk.Frame):
+class LoginFrame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        self.__create_widgets(parent, controller)
-        # self.pack(side="top", fill=tk.BOTH, expand=1)
+        self.__create_widgets(controller)
 
-    def __create_widgets(self, parent, controller):
+    def __create_widgets(self, controller):
         self.canvas = tk.Canvas(
             self,
             bg="#ffffff",
@@ -100,29 +96,29 @@ class LoginFrame(ttk.Frame):
         )
         self.canvas.place(x=0, y=0)
         # ---Image---
-        self.ImgLoginBg = convertImage(
+        self.ImgLoginBg = convert_image(
             controller, "./assets/Login_Background.png", 1448, 900
         )
-        self.ImgEntry = convertImage(controller, "./assets/Login_Entry.png", 510, 84)
-        self.ImgLoginBtn = convertImage(
+        self.ImgEntry = convert_image(controller, "./assets/Login_Entry.png", 510, 84)
+        self.ImgLoginBtn = convert_image(
             controller, "./assets/Login_LoginButton.png", 510, 84
         )
-        self.ImgSingupBtn = convertImage(
+        self.ImgSignupBtn = convert_image(
             controller, "./assets/Login_SignupButton.png", 129, 38
         )
         # ------
 
         # ---Background---
         self.LoginBg = self.canvas.create_image(
-            convertSize(controller, 724),
-            convertSize(controller, 450),
+            convert_size(controller, 724),
+            convert_size(controller, 450),
             image=self.ImgLoginBg,
         )
 
         # ---Entry username---
         self.UserEntryBg = self.canvas.create_image(
-            convertSize(controller, 1201),
-            convertSize(controller, 304),
+            convert_size(controller, 1201),
+            convert_size(controller, 304),
             image=self.ImgEntry,
         )
         self.UserEntry = tk.Entry(
@@ -133,17 +129,17 @@ class LoginFrame(ttk.Frame):
             font=controller.entryFontSize,
         )
         self.UserEntry.place(
-            x=convertSize(controller, 962),
-            y=convertSize(controller, 262) + controller.entryDiscrenpancy,
-            width=convertSize(controller, 478),
+            x=convert_size(controller, 962),
+            y=convert_size(controller, 262) + controller.entryDiscrenpancy,
+            width=convert_size(controller, 478),
             height=controller.entryHeight,
         )
         # ------
 
         # ---Entry password---
         self.PswdEntryBg = self.canvas.create_image(
-            convertSize(controller, 1201),
-            convertSize(controller, 459),
+            convert_size(controller, 1201),
+            convert_size(controller, 459),
             image=self.ImgEntry,
         )
         self.PswdEntry = tk.Entry(
@@ -154,9 +150,9 @@ class LoginFrame(ttk.Frame):
             font=controller.entryFontSize,
         )
         self.PswdEntry.place(
-            x=convertSize(controller, 962),
-            y=convertSize(controller, 417) + controller.entryDiscrenpancy,
-            width=convertSize(controller, 478),
+            x=convert_size(controller, 962),
+            y=convert_size(controller, 417) + controller.entryDiscrenpancy,
+            width=convert_size(controller, 478),
             height=controller.entryHeight,
         )
         # ------
@@ -169,34 +165,36 @@ class LoginFrame(ttk.Frame):
             highlightthickness=0,
             command=self.submitLogin,
             relief="flat",
-        ).place(
-            x=convertSize(controller, 946),
-            y=convertSize(controller, 572),
-            width=convertSize(controller, 510),
-            height=convertSize(controller, 84),
+        )
+        self.LoginLoginBtn.place(
+            x=convert_size(controller, 946),
+            y=convert_size(controller, 572),
+            width=convert_size(controller, 510),
+            height=convert_size(controller, 84),
         )
         # ------
         # --- BUTTON "Create one" ---
         self.LoginSignupBtn = tk.Button(
             master=self,
-            image=self.ImgSingupBtn,
+            image=self.ImgSignupBtn,
             borderwidth=0,
             highlightthickness=0,
             command=lambda: controller.show_frame("SignupFrame"),
             relief="flat",
-        ).place(
-            x=convertSize(controller, 1302),
-            y=convertSize(controller, 788),
-            width=convertSize(controller, 129),
-            height=convertSize(controller, 38),
+        )
+        self.LoginSignupBtn.place(
+            x=convert_size(controller, 1302),
+            y=convert_size(controller, 788),
+            width=convert_size(controller, 129),
+            height=convert_size(controller, 38),
         )
         # ------
 
     def submitLogin(self):
-        usernameInput = self.UserEntry.get()
-        passwordInput = self.PswdEntry.get()
-        print(usernameInput, passwordInput)
-        valid, pop_up, username = Login(client, usernameInput, passwordInput)
+        username_input = self.UserEntry.get()
+        password_input = self.PswdEntry.get()
+        print(username_input, password_input)
+        valid, pop_up, username = Login(client, username_input, password_input)
         print(pop_up)
         if not valid:
             messagebox.showinfo("Invalid input", pop_up)
@@ -204,16 +202,17 @@ class LoginFrame(ttk.Frame):
             messagebox.showinfo("Login status", pop_up)
             if username:
                 self.controller.username = username
+                self.controller.show_frame("MenuFrame")
 
 
-class SignupFrame(ttk.Frame):
+class SignupFrame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        self.__create_widgets(parent, controller)
+        self.__create_widgets(controller)
         # self.pack(fill=tk.BOTH, expand=1)
 
-    def __create_widgets(self, parent, controller):
+    def __create_widgets(self, controller):
         self.canvas = tk.Canvas(
             self,
             bg="#ffffff",
@@ -224,24 +223,24 @@ class SignupFrame(ttk.Frame):
             relief="ridge",
         )
         self.canvas.place(x=0, y=0)
-        self.ImgSignupBg = convertImage(
+        self.ImgSignupBg = convert_image(
             controller, "./assets/Signup_Background.png", 547, 470
         )
-        self.ImgSignupEntry = convertImage(
+        self.ImgSignupEntry = convert_image(
             controller, "./assets/Signup_Entry.png", 560, 88
         )
-        self.ImgBackBtn = convertImage(
+        self.ImgBackBtn = convert_image(
             controller, "./assets/Signup_BackButton.png", 228, 61
         )
-        self.ImgSubmitBtn = convertImage(
+        self.ImgSubmitBtn = convert_image(
             controller, "./assets/Signup_SubmitButton.png", 560, 88
         )
         # ------
 
         # ---Background---
         self.SignupBg = self.canvas.create_image(
-            convertSize(controller, 806.5),
-            convertSize(controller, 303.0),
+            convert_size(controller, 806.5),
+            convert_size(controller, 303.0),
             image=self.ImgSignupBg,
         )
         # ------
@@ -254,18 +253,19 @@ class SignupFrame(ttk.Frame):
             highlightthickness=0,
             command=lambda: controller.show_frame("LoginFrame"),
             relief="flat",
-        ).place(
-            x=convertSize(controller, 24),
-            y=convertSize(controller, 20),
-            width=convertSize(controller, 228),
-            height=convertSize(controller, 61),
+        )
+        self.signupBackBtn.place(
+            x=convert_size(controller, 24),
+            y=convert_size(controller, 20),
+            width=convert_size(controller, 228),
+            height=convert_size(controller, 61),
         )
         # ------
 
         # ---Entry username---
         self.signupUserBg = self.canvas.create_image(
-            convertSize(controller, 800),
-            convertSize(controller, 270),
+            convert_size(controller, 800),
+            convert_size(controller, 270),
             image=self.ImgSignupEntry,
         )
         self.signupUserEntry = tk.Entry(
@@ -276,17 +276,17 @@ class SignupFrame(ttk.Frame):
             font=controller.entryFontSize,
         )
         self.signupUserEntry.place(
-            x=convertSize(controller, 536),
-            y=convertSize(controller, 226) + controller.entryDiscrenpancy,
-            width=convertSize(controller, 528),
+            x=convert_size(controller, 536),
+            y=convert_size(controller, 226) + controller.entryDiscrenpancy,
+            width=convert_size(controller, 528),
             height=controller.entryHeight,
         )
         # ------
 
         # ---Entry password---
         self.signupPswdBg = self.canvas.create_image(
-            convertSize(controller, 800),
-            convertSize(controller, 429),
+            convert_size(controller, 800),
+            convert_size(controller, 429),
             image=self.ImgSignupEntry,
         )
         self.signupPswdEntry = tk.Entry(
@@ -297,17 +297,17 @@ class SignupFrame(ttk.Frame):
             font=controller.entryFontSize,
         )
         self.signupPswdEntry.place(
-            x=convertSize(controller, 536),
-            y=convertSize(controller, 385) + controller.entryDiscrenpancy,
-            width=convertSize(controller, 528),
+            x=convert_size(controller, 536),
+            y=convert_size(controller, 385) + controller.entryDiscrenpancy,
+            width=convert_size(controller, 528),
             height=controller.entryHeight,
         )
         # ------
 
         # ---Entry Bank number---
         self.signupBankBg = self.canvas.create_image(
-            convertSize(controller, 800),
-            convertSize(controller, 590),
+            convert_size(controller, 800),
+            convert_size(controller, 590),
             image=self.ImgSignupEntry,
         )
         self.signupBankEntry = tk.Entry(
@@ -318,9 +318,9 @@ class SignupFrame(ttk.Frame):
             font=controller.entryFontSize,
         )
         self.signupBankEntry.place(
-            x=convertSize(controller, 536),
-            y=convertSize(controller, 546) + controller.entryDiscrenpancy,
-            width=convertSize(controller, 528),
+            x=convert_size(controller, 536),
+            y=convert_size(controller, 546) + controller.entryDiscrenpancy,
+            width=convert_size(controller, 528),
             height=controller.entryHeight,
         )
 
@@ -332,11 +332,12 @@ class SignupFrame(ttk.Frame):
             highlightthickness=0,
             command=self.Submit,
             relief="flat",
-        ).place(
-            x=convertSize(controller, 520),
-            y=convertSize(controller, 705),
-            width=convertSize(controller, 560),
-            height=convertSize(controller, 88),
+        )
+        self.submitBtn.place(
+            x=convert_size(controller, 520),
+            y=convert_size(controller, 705),
+            width=convert_size(controller, 560),
+            height=convert_size(controller, 88),
         )
 
     def Submit(self):
@@ -350,6 +351,64 @@ class SignupFrame(ttk.Frame):
             messagebox.showinfo("Invalid input", pop_up)
         else:
             messagebox.showinfo("Register status", pop_up)
+
+
+def btn_clicked():
+    print("Button clicked")
+
+
+class MenuFrame(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        self.__create_widgets(controller)
+
+    def __create_widgets(self, controller):
+        self.canvas = tk.Canvas(self, bg="#ffffff",
+                                height=controller.frameHeight,
+                                width=controller.frameWidth,
+                                bd=0, highlightthickness=0, relief="ridge")
+        self.canvas.place(x=0, y=0)
+
+        self.ImgBg = convert_image(controller, "./assets/Menu_BG.png", 1302, 552)
+        self.ImgLogout = convert_image(controller, "./assets/Menu_img0.png", 182, 258)
+        self.ImgGuide = convert_image(controller, "./assets/Menu_img1.png", 182, 258)
+        self.ImgReservation = convert_image(controller, "./assets/Menu_img2.png", 234, 258)
+        self.ImgHotel = convert_image(controller, "./assets/Menu_img3.png", 182, 258)
+
+        # ---Background---
+        self.BG = self.canvas.create_image(convert_size(controller, 800),
+                                           convert_size(controller, 624),
+                                           image=self.ImgBg)
+        # ------
+
+        # ---Logout button---
+        self.LogoutBtn = tk.Button(master=self, image=self.ImgLogout, borderwidth=0,
+                                   highlightthickness=0, command=lambda: btn_clicked(), relief="flat")
+        self.LogoutBtn.place(x=convert_size(controller, 1255), y=convert_size(controller, 52),
+                             width=convert_size(controller, 182), height=convert_size(controller, 258))
+        # ------
+
+        # ---Guide button---
+        self.GuideBtn = tk.Button(master=self, image=self.ImgGuide, borderwidth=0,
+                                  highlightthickness=0, command=lambda: btn_clicked(), relief="flat")
+        self.GuideBtn.place(x=convert_size(controller, 891), y=convert_size(controller, 50),
+                            width=convert_size(controller, 182), height=convert_size(controller, 258))
+        # ------
+
+        # ---Reservation button---
+        self.ReservationBtn = tk.Button(master=self, image=self.ImgReservation, borderwidth=0,
+                                        highlightthickness=0, command=lambda: btn_clicked(), relief="flat")
+        self.ReservationBtn.place(x=convert_size(controller, 502), y=convert_size(controller, 50),
+                                  width=convert_size(controller, 234), height=convert_size(controller, 258))
+        # ------
+
+        # ---Hotel list Button---
+        self.HotelBtn = tk.Button(master=self, image=self.ImgHotel, borderwidth=0,
+                                  highlightthickness=0, command=lambda: btn_clicked(), relief="flat")
+        self.HotelBtn.place(x=convert_size(controller, 163), y=convert_size(controller, 50),
+                            width=convert_size(controller, 182), height=convert_size(controller, 258))
+        # ------
 
 
 if __name__ == "__main__":
