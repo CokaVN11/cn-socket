@@ -365,8 +365,7 @@ class MenuFrame(tk.Frame):
 
     def __create_widgets(self, controller):
         self.canvas = tk.Canvas(self, bg="#ffffff",
-                                height=controller.frameHeight,
-                                width=controller.frameWidth,
+                                height=controller.frameHeight, width=controller.frameWidth,
                                 bd=0, highlightthickness=0, relief="ridge")
         self.canvas.place(x=0, y=0)
 
@@ -384,7 +383,7 @@ class MenuFrame(tk.Frame):
 
         # ---Logout button---
         self.LogoutBtn = tk.Button(master=self, image=self.ImgLogout, borderwidth=0,
-                                   highlightthickness=0, command=lambda: btn_clicked(), relief="flat")
+                                   highlightthickness=0, command=lambda: self.LogoutClicked(), relief="flat")
         self.LogoutBtn.place(x=convert_size(controller, 1255), y=convert_size(controller, 52),
                              width=convert_size(controller, 182), height=convert_size(controller, 258))
         # ------
@@ -398,18 +397,30 @@ class MenuFrame(tk.Frame):
 
         # ---Reservation button---
         self.ReservationBtn = tk.Button(master=self, image=self.ImgReservation, borderwidth=0,
-                                        highlightthickness=0, command=lambda: btn_clicked(), relief="flat")
+                                        highlightthickness=0, command=lambda: self.ReservationClicked(), relief="flat")
         self.ReservationBtn.place(x=convert_size(controller, 502), y=convert_size(controller, 50),
                                   width=convert_size(controller, 234), height=convert_size(controller, 258))
         # ------
 
         # ---Hotel list Button---
         self.HotelBtn = tk.Button(master=self, image=self.ImgHotel, borderwidth=0,
-                                  highlightthickness=0, command=lambda: btn_clicked(), relief="flat")
+                                  highlightthickness=0, command=lambda: self.HotelListClicked(), relief="flat")
         self.HotelBtn.place(x=convert_size(controller, 163), y=convert_size(controller, 50),
                             width=convert_size(controller, 182), height=convert_size(controller, 258))
         # ------
 
+    @staticmethod
+    def HotelListClicked():
+        # username = self.controller.username
+        ShowHotelList(client)
+
+    def ReservationClicked(self):
+        username = self.controller.username
+        ShowBooked(client, username)
+
+    def LogoutClicked(self):
+        self.controller.username = ""
+        self.controller.show_frame("LoginFrame")
 
 if __name__ == "__main__":
     connected = True

@@ -1,9 +1,7 @@
 import socket
 import sqlite3
-import string
 import threading
 import json
-import sys
 import datetime
 
 IP = socket.gethostbyname(socket.gethostname())
@@ -31,6 +29,7 @@ def send_s(conn: socket.socket(), msg: str):
 def recv_s(conn: socket.socket()):
     if conn:
         msg = conn.recv(BUFSIZ).decode(FORMAT)
+        print(msg)
         conn.sendall(msg.encode(FORMAT))
         return msg
     else:
@@ -47,11 +46,11 @@ def isExistTable(sqlConn: sqlite3.Connection, table: str):
     """
     It checks if a table exists in a database
 
-    :param sqlConn: sqlite3.Connection
-    :type sqlConn: sqlite3.Connection
-    :param table: the name of the table you want to check
-    :type table: str
-    :return: A boolean value.
+    param sqlConn: sqlite3.Connection
+    type sqlConn: sqlite3.Connection
+    param table: the name of the table you want to check
+    type table: str
+    return: A boolean value.
     """
     if sqlConn:
         cx = sqlConn.cursor()
@@ -211,10 +210,10 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
 
 def NavigateChoice(conn, addr, sqlConn: sqlite3.Connection, choice):
     if choice == OPTIONS["register"]:
-        print(f"[{addr}] Registing")
+        print(f"[{addr}] Registering")
         Register(conn, addr, sqlConn)
     elif choice == OPTIONS["login"]:
-        print(f"[{addr}] Loginning")
+        print(f"[{addr}] Logining")
         Login(conn, addr, sqlConn)
     elif choice == OPTIONS["hotel_list"]:
         print(f"[{addr}] Want to get hotel list")
@@ -225,15 +224,16 @@ def NavigateChoice(conn, addr, sqlConn: sqlite3.Connection, choice):
     elif choice == OPTIONS["guide"]:
         print(f"[{addr}] Booking guide")
     elif choice == "6":
-        print(f"[{addr}] Logouting")
+        print(f"[{addr}] Log-outing")
 
 
 def handle_client(conn, addr, sqlConn: sqlite3.Connection):
     """
-    It handle client
+    It handles client
 
-    :param conn: The connection object
-    :param addr: The address of the client
+    param conn: The connection object
+    param addr: The address of the client
+    param sqlConn: The connection to sql database
     """
     print(f"[NEW CONNECTION] {addr} connected.")
 
@@ -257,7 +257,7 @@ def accept_incoming_connection(server):
     """
     It accepts incoming connections and creates a new thread for each connection
 
-    :param server: The server object
+    param server: The server object
     """
     while True:
         conn, addr = server.accept()
@@ -278,7 +278,7 @@ def main():
     accept_thread = threading.Thread(target=accept_incoming_connection, args=(server,))
 
     accept_thread.start()
-    accept_thread.join()  # prevent another thread start when it not finished
+    accept_thread.join()  # prevent another thread start when it is not finished
     server.close()
 
 
