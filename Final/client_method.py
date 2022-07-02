@@ -10,6 +10,7 @@ BUFSIZ = 1024
 FORMAT = "utf-8"
 QUIT_MSG = "!quit"
 SPEC_CHAR = re.compile("[@_!#$%^&*()<>?/\|}{~:]")
+OPTIONS = {"register": "1", "login": "2"}
 
 
 def send_s(conn: socket.socket(), msg: str):
@@ -59,10 +60,10 @@ def checkFieldValid(typeCheck, userInput):
 
 
 def Register(client, username, password, bank):
-    send_s(client, "1")
+    send_s(client, OPTIONS["register"])
     valid = True
     pop_up = ""
-    input_dict = {'username': username, 'password': password, 'bank': bank}
+    input_dict = {"username": username, "password": password, "bank": bank}
     for field, userInput in input_dict.items():
         valid, tmp = checkFieldValid(field, userInput)
         if pop_up != "":
@@ -84,15 +85,12 @@ def Register(client, username, password, bank):
 
 
 def Login(client, username, password):
-    send_s(client, "2")
+    send_s(client, OPTIONS["login"])
     valid = True
     pop_up = ""
     valid_username = None
-    # valid, pop_up = checkFieldValid("username", username)
-    # valid, tmp = checkFieldValid("password", password)
-    # pop_up += "\n" + tmp
 
-    input_dict = {'username': username, 'password': password}
+    input_dict = {"username": username, "password": password}
     for field, userInput in input_dict.items():
         valid, tmp = checkFieldValid(field, userInput)
         if pop_up != "":

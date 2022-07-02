@@ -13,6 +13,13 @@ BUFSIZ = 1024
 FORMAT = "utf-8"
 QUIT_MSG = "!quit"
 DB = "./database.db"
+OPTIONS = {
+    "register": "1",
+    "login": "2",
+    "hotel_list": "3",
+    "reservation": "4",
+    "guide": "5"
+}
 
 
 def send_s(conn: socket.socket(), msg: str):
@@ -28,6 +35,7 @@ def recv_s(conn: socket.socket()):
         return msg
     else:
         return None
+
 
 # def send_list(conn: socket.socket(), msgs: list):
 #     for msg in msgs:
@@ -62,7 +70,9 @@ def isExistTable(sqlConn: sqlite3.Connection, table: str):
         return False
 
 
-def isNewUser(sqlConn: sqlite3.Connection, table: str, username: str, password: str, bank: int):
+def isNewUser(
+    sqlConn: sqlite3.Connection, table: str, username: str, password: str, bank: int
+):
     if sqlConn:
         cx = sqlConn.cursor()
         query = "SELECT * FROM " + table + " WHERE username LIKE '" + username + "'"
@@ -76,7 +86,9 @@ def isNewUser(sqlConn: sqlite3.Connection, table: str, username: str, password: 
         return None
 
 
-def insertUserIntoTable(sqlConn: sqlite3.Connection, name: str, password: str, bank: int):
+def insertUserIntoTable(
+    sqlConn: sqlite3.Connection, name: str, password: str, bank: int
+):
     if sqlConn:
         cx = sqlConn.cursor()
         create_table = """CREATE TABLE IF NOT EXISTS USER
@@ -124,7 +136,8 @@ def Register(conn, addr, sqlConn: sqlite3.Connection):
         if username and password and bank:
             print(f"[SERVER] Received from {addr}")
             print(
-                f"[{addr}] username = {username}, password = {password}, bank number = {bank}")
+                f"[{addr}] username = {username}, password = {password}, bank number = {bank}"
+            )
             if isNewUser(sqlConn, "USER", username, password, bank):
                 insertUserIntoTable(sqlConn, username, password, bank)
                 send_s(conn, "Oke")
@@ -166,7 +179,8 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
             from RESERVATION, HOTEL, ROOM 
             where RESERVATION.USERNAME = '{username}' and 
             RESERVATION.HOTEL_ID = HOTEL.ID and
-            RESERVATION.ROOM_ID = ROOM.ID""")
+            RESERVATION.ROOM_ID = ROOM.ID"""
+        )
 
         rows = [dict(row) for row in cx]
 
@@ -175,10 +189,12 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
         if len(rows) != 0:
             for row in rows:
                 # print(type(row['ARRIVAL']))
-                row['ARRIVAL'] = datetime.datetime.fromtimestamp(
-                    float(row['ARRIVAL'])).strftime("%d/%m/%Y")
-                row['DEPARTURE'] = datetime.datetime.fromtimestamp(
-                    float(row['DEPARTURE'])).strftime("%d/%m/%Y")
+                row["ARRIVAL"] = datetime.datetime.fromtimestamp(
+                    float(row["ARRIVAL"])
+                ).strftime("%d/%m/%Y")
+                row["DEPARTURE"] = datetime.datetime.fromtimestamp(
+                    float(row["DEPARTURE"])
+                ).strftime("%d/%m/%Y")
                 # print(type(row['ARRIVAL']))
                 # print(row)
             data = json.dumps([dict(ix) for ix in rows])
@@ -194,24 +210,21 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
 
 
 def NavigateChoice(conn, addr, sqlConn: sqlite3.Connection, choice):
-    if type(choice) != int:
-        choice = int(choice)
-    if choice == 1:
+    if choice == OPTIONS["register"]:
         print(f"[{addr}] Registing")
         Register(conn, addr, sqlConn)
-    elif choice == 2:
+    elif choice == OPTIONS["login"]:
         print(f"[{addr}] Loginning")
         Login(conn, addr, sqlConn)
-    elif choice == 3:
+    elif choice == OPTIONS["hotel_list"]:
         print(f"[{addr}] Want to get hotel list")
         SendHotelList(conn, addr, sqlConn)
-
-    elif choice == 4:
+    elif choice == OPTIONS["reservation"]:
         print(f"[{addr}] Want to get booked room")
         SendBookedList(conn, addr, sqlConn)
-    elif choice == 5:
+    elif choice == OPTIONS["guide"]:
         print(f"[{addr}] Booking guide")
-    elif choice == 6:
+    elif choice == "6":
         print(f"[{addr}] Logouting")
 
 
@@ -232,7 +245,7 @@ def handle_client(conn, addr, sqlConn: sqlite3.Connection):
             connected = False
         else:
             if msg.isdigit():
-                NavigateChoice(conn, addr, sqlConn, int(msg))
+                NavigateChoice(conn, addr, sqlConn, msg)
             else:
                 print(f"[{addr}] sent {msg}")
                 send_s(conn, msg)
@@ -249,8 +262,7 @@ def accept_incoming_connection(server):
     while True:
         conn, addr = server.accept()
         sqlConn = sqlite3.connect(DB, check_same_thread=False)
-        thread = threading.Thread(
-            target=handle_client, args=(conn, addr, sqlConn))
+        thread = threading.Thread(target=handle_client, args=(conn, addr, sqlConn))
 
         thread.start()
         print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 2}")
@@ -263,8 +275,7 @@ def main():
     server.listen()
     print(f"[LISTENING] Server is listening on {IP}:{PORT}")
 
-    accept_thread = threading.Thread(
-        target=accept_incoming_connection, args=(server,))
+    accept_thread = threading.Thread(target=accept_incoming_connection, args=(server,))
 
     accept_thread.start()
     accept_thread.join()  # prevent another thread start when it not finished
