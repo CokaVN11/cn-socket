@@ -1,0 +1,46 @@
+- Chọn loại dữ liệu để tính :
+    + Float
+
+- Programming :
+    1/ Validating
+    2/ Converting
+    3/ Calculating
+
+- Command line : A.exe InputPath N Action OutputPath
+∗ A.exe: Your execution ".exe" file.
+∗ InputPath: Path to the "input.txt" file.
+∗ N: an integer, represent the number of expressions from the "input.txt" file.
+∗ Action: • -c: calculate the identified the expressions.
+• -t: convert the identified the expressions into postfix
+expressions.
+∗ OutputPath: Path to the "output.txt" file, which will be mentioned below.
+
+=======================================
+Tasks :
+a) Programming (KHANH & TRUNG)
+    1/ Validating
+    2/ Converting
+    3/ Calculating
+
+    4/ Command line (-c & -t)
+
+b) Report (KHOI & NGHIA)
+    - Information page
+
+    - Presented research answers from 1.1 :
+        + Converting an infix expression to a prefix expression.
+            a) Main idea
+            b) Step-by-Step
+            c) Pseudo code
+            d) Example
+        + Converting an infix expression to a postfix expression.
+        + Converting a prefix expression to a postfix expression.
+    - Information of code fragment from 1.2 :
+        + Data structures : Binary Tree
+        + Algorithms :
+        + Functions :
+    - Theoretical Questions :
+        + Time complexity (Config, Explain why)
+        + Compare (Which group)
+
+    - List of references

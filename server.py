@@ -87,7 +87,7 @@ def insertUserIntoTable(sqlConn: sqlite3.Connection, name: str, password: str, b
         cx.execute(create_table)
 
         data = (name, password, bank)
-        insert_cmd = "INSERT INTO " + table + " VALUES (?,?,?)"
+        insert_cmd = "INSERT INTO USER VALUES (?,?,?)"
         cx.execute(insert_cmd, data)
         sqlConn.commit()
 
@@ -126,7 +126,7 @@ def Register(conn, addr, sqlConn: sqlite3.Connection):
             print(
                 f"[{addr}] username = {username}, password = {password}, bank number = {bank}")
             if isNewUser(sqlConn, "USER", username, password, bank):
-                insertUserIntoTable(sqlConn, "USER", username, password, bank)
+                insertUserIntoTable(sqlConn, username, password, bank)
                 send_s(conn, "Oke")
             else:
                 send_s(conn, "Not oke")

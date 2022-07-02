@@ -1,307 +1,338 @@
-from tkinter import *
+import tkinter as tk
+from tkinter import ttk
 from tkinter import messagebox
 from math import floor
 from PIL import Image, ImageTk
-
-global Login_Background
-global Login_Entry
-global Login_LoginButton
-global Login_SignupButton
-global Signup_Background
-global Signup_Entry
-global Signup_BackButton
-global Signup_SubmitButton
+from client_method import *
 
 
-# ====================== Convert Function =======================#
-def btn_clicked():
-    print("Button Clicked")
+@staticmethod
+def convertSize(window, originalSize):
+    return floor((window.frameWidth * originalSize) / 1600)
 
 
-def convertSize(originalSize):
-    frameWidth = window.winfo_screenwidth() * scaleRate
-    return floor((frameWidth * originalSize) / 1600)
-
-
-# originalWidth & originalHeight are the Width and Height on Figma
-def convertImage(path, originalWidth, originalHeight):
+@staticmethod
+def convertImage(window, path, originalWidth, originalHeight):
     originalImage = Image.open(path)
     resizedImage = originalImage.resize(
-        (convertSize(originalWidth), convertSize(originalHeight)))
+        (convertSize(window,
+                     originalWidth), convertSize(window, originalHeight)))
     convertedImage = ImageTk.PhotoImage(resizedImage)
     return convertedImage
 
 
-# ================================================================
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect(ADDR)
+print(f"[CONNECTED] Client connected to server at {IP}:{PORT}")
 
 
-def clearScreen():
-    for widget in window.place_slaves():
-        widget.place_forget()
+class App(tk.Tk):
+
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
+        self.focus_force()
+        self.grab_set()
+        self.title('Go2Chill')
+        self.scaleRate = 0.8
+
+        self.frameWidth = floor(self.winfo_screenwidth() * self.scaleRate)
+        self.frameHeight = floor(self.frameWidth * 9 / 16)
+        self.fontSize = convertSize(self, 40)
+        self.resolution = f"{self.frameWidth}x{self.frameHeight}"
+
+        self.entryHeight = convertSize(self, 60)
+        self.entryFontSize = f"{convertSize(self, 80)}"
+        self.entryDiscrenpancy = convertSize(self, 12)
+
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.geometry(self.resolution)
+        # self.configure(bg="#ffffff")
+        self.resizable(0, 0)
+
+        container = tk.Frame(self)
+        container.pack(side="top", fill="both", expand=1)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        self.frames = {}
+
+        for F in (LoginFrame, SignupFrame):
+            page_name = F.__name__
+            frame = F(parent=container, controller=self)
+            self.frames[page_name] = frame
+
+            frame.grid(row=0, column=0, sticky="nsew")
+        self.show_frame("LoginFrame")
+
+    def on_closing(self):
+        print(QUIT_MSG)
+        # client.sendall("{quit}")
+        send_s(client, QUIT_MSG)
+        client.close()
+        self.quit()
+
+    def show_frame(self, page_name):
+        '''Show a frame for the given name'''
+        print(f"Show {page_name}")
+        frame = self.frames[page_name]
+        frame.tkraise()
 
 
-def LoginScreen():
-    clearScreen()
+class LoginFrame(ttk.Frame):
 
-    Login_Background = convertImage("./assets/Login_Background.png", 1448, 900)
-    Login_Entry = convertImage("./assets/Login_Entry.png", 510, 84)
-    Login_LoginButton = convertImage("./assets/Login_LoginButton.png", 510, 84)
-    Login_SignupButton = convertImage("./assets/Login_SignupButton.png", 129, 38)
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        self.__create_widgets(parent, controller)
+        # self.pack(side="top", fill=tk.BOTH, expand=1)
 
-    canvas = Canvas(
-        window,
-        bg="#ffffff",
-        height=frameHeight,
-        width=frameWidth,
-        bd=0,
-        highlightthickness=0,
-        relief="ridge",
-    )
-    canvas.place(x=0, y=0)
+    def __create_widgets(self, parent, controller):
+        self.canvas = tk.Canvas(self,
+                                bg="#ffffff",
+                                height=controller.frameHeight,
+                                width=controller.frameWidth,
+                                bd=0,
+                                highlightthickness=0,
+                                relief="ridge")
+        self.canvas.place(x=0, y=0)
+        # ---Image---
+        self.ImgLoginBg = convertImage(controller,
+                                       "./assets/Login_Background.png", 1448,
+                                       900)
+        self.ImgEntry = convertImage(controller, "./assets/Login_Entry.png",
+                                     510, 84)
+        self.ImgLoginBtn = convertImage(controller,
+                                        "./assets/Login_LoginButton.png", 510,
+                                        84)
+        self.ImgSingupBtn = convertImage(controller,
+                                         "./assets/Login_SignupButton.png",
+                                         129, 38)
+        # ------
 
-    # Background
-    LoginBackground = canvas.create_image(convertSize(724.0),
-                                          convertSize(450.0),
-                                          image=Login_Background)
+        # ---Background---
+        self.LoginBg = self.canvas.create_image(convertSize(controller, 724),
+                                                convertSize(controller, 450),
+                                                image=self.ImgLoginBg)
 
-    # ---------- Entry Username
-    LoginEntry1Background = canvas.create_image(convertSize(1201),
-                                                convertSize(304),
-                                                image=Login_Entry)
-    LoginEntry1 = Entry(bd=0,
-                        bg="#ffffff",
-                        highlightthickness=0,
-                        font=(EntryFontSize))
-    LoginEntry1.place(
-        x=convertSize(962),
-        y=convertSize(262) + EntryDiscrepancy,
-        width=convertSize(478),
-        height=EntryHeight,
-    )
+        # ---Entry username---
+        self.UserEntryBg = self.canvas.create_image(
+            convertSize(controller, 1201),
+            convertSize(controller, 304),
+            image=self.ImgEntry,
+        )
+        self.UserEntry = tk.Entry(master=self,
+                                  bd=0,
+                                  bg="#ffffff",
+                                  highlightthickness=0,
+                                  font=controller.entryFontSize)
+        self.UserEntry.place(
+            x=convertSize(controller, 962),
+            y=convertSize(controller, 262) + controller.entryDiscrenpancy,
+            width=convertSize(controller, 478),
+            height=controller.entryHeight,
+        )
+        # ------
 
-    # ---------- Entry Password
-    LoginEntry2Background = canvas.create_image(convertSize(1201.0),
-                                                convertSize(459.0),
-                                                image=Login_Entry)
-    LoginEntry2 = Entry(bd=0,
-                        bg="#ffffff",
-                        highlightthickness=0,
-                        font=(EntryFontSize))
-    LoginEntry2.place(
-        x=convertSize(962),
-        y=convertSize(417) + EntryDiscrepancy,
-        width=convertSize(478),
-        height=EntryHeight,
-    )
+        # ---Entry password---
+        self.PswdEntryBg = self.canvas.create_image(
+            convertSize(controller, 1201),
+            convertSize(controller, 459),
+            image=self.ImgEntry,
+        )
+        self.PswdEntry = tk.Entry(master=self,
+                                  bd=0,
+                                  bg="#ffffff",
+                                  highlightthickness=0,
+                                  font=controller.entryFontSize)
+        self.PswdEntry.place(
+            x=convertSize(controller, 962),
+            y=convertSize(controller, 417) + controller.entryDiscrenpancy,
+            width=convertSize(controller, 478),
+            height=controller.entryHeight,
+        )
+        # ------
 
-    def submitLogin():
-        usernameInput = LoginEntry1.get()
-        passwordInput = LoginEntry2.get()
+        # --- BUTTON "Login" ---
+        self.LoginLoginBtn = tk.Button(
+            master=self,
+            image=self.ImgLoginBtn,
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.submitLogin,
+            relief="flat",
+        ).place(
+            x=convertSize(controller, 946),
+            y=convertSize(controller, 572),
+            width=convertSize(controller, 510),
+            height=convertSize(controller, 84),
+        )
+        # ------
+        # --- BUTTON "Create one" ---
+        self.LoginSignupBtn = tk.Button(
+            master=self,
+            image=self.ImgSingupBtn,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: controller.show_frame("SignupFrame"),
+            relief="flat",
+        ).place(
+            x=convertSize(controller, 1302),
+            y=convertSize(controller, 788),
+            width=convertSize(controller, 129),
+            height=convertSize(controller, 38),
+        )
+        # ------
+
+    def submitLogin(self):
+        usernameInput = self.UserEntry.get()
+        passwordInput = self.PswdEntry.get()
         print(usernameInput, passwordInput)
-
-    # ---------- BUTTON "Log in"
-    LoginLoginButton = Button(
-        image=Login_LoginButton,
-        borderwidth=0,
-        highlightthickness=0,
-        command=submitLogin,
-        relief="flat",
-    ).place(
-        x=convertSize(946),
-        y=convertSize(572),
-        width=convertSize(510),
-        height=convertSize(84),
-    )
-
-    # ---------- BUTTON "Create one"
-    LoginSignupButton = Button(
-        image=Login_SignupButton,
-        borderwidth=0,
-        highlightthickness=0,
-        command=SignupScreen,
-        relief="flat",
-    ).place(
-        x=convertSize(1302),
-        y=convertSize(788),
-        width=convertSize(129),
-        height=convertSize(38),
-    )
+        valid, pop_up, username = Login(client, usernameInput, passwordInput)
+        print(pop_up)
+        if not valid:
+            messagebox.showinfo("Invalid input", pop_up)
+        else:
+            messagebox.showinfo("Login status", pop_up)
 
 
-def SignupScreen():
-    clearScreen()
+class SignupFrame(ttk.Frame):
 
-    Signup_Background = convertImage("./assets/Signup_Background.png", 547,
-                                     470)
-    Signup_Entry = convertImage("./assets/Signup_Entry.png", 560, 88)
-    Signup_BackButton = convertImage("./assets/Signup_BackButton.png", 228, 61)
-    Signup_SubmitButton = convertImage("./assets/Signup_SubmitButton.png", 560,
-                                       88)
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        self.__create_widgets(parent, controller)
+        # self.pack(fill=tk.BOTH, expand=1)
 
-    canvas = Canvas(
-        window,
-        bg="#ffffff",
-        height=frameHeight,
-        width=frameWidth,
-        bd=0,
-        highlightthickness=0,
-        relief="ridge",
-    ).place(x=0, y=0)
+    def __create_widgets(self, parent, controller):
+        self.canvas = tk.Canvas(
+            self,
+            bg="#ffffff",
+            height=controller.frameHeight,
+            width=controller.frameWidth,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge",
+        )
+        self.canvas.place(x=0, y=0)
+        self.ImgSignupBg = convertImage(controller,
+                                        "./assets/Signup_Background.png", 547,
+                                        470)
+        self.ImgSignupEntry = convertImage(controller,
+                                           "./assets/Signup_Entry.png", 560,
+                                           88)
+        self.ImgBackBtn = convertImage(controller,
+                                       "./assets/Signup_BackButton.png", 228,
+                                       61)
+        self.ImgSubmitBtn = convertImage(controller,
+                                         "./assets/Signup_SubmitButton.png",
+                                         560, 88)
+        # ------
 
-    # Background
-    SignupBackground = canvas.create_image(convertSize(806.5),
-                                           convertSize(303.0),
-                                           image=Signup_Background)
+        # ---Background---
+        self.SignupBg = self.canvas.create_image(
+            convertSize(controller, 806.5),
+            convertSize(controller, 303.0),
+            image=self.ImgSignupBg,
+        )
+        # ------
 
-    # ---------- BUTTON "Back"
-    SignupBackButton = Button(
-        image=Signup_BackButton,
-        borderwidth=0,
-        highlightthickness=0,
-        command=LoginScreen,
-        relief="flat",
-    ).place(
-        x=convertSize(24),
-        y=convertSize(20),
-        width=convertSize(228),
-        height=convertSize(61),
-    )
+        # ---BUTTON "Back"---
+        self.signupBackBtn = tk.Button(
+            master=self,
+            image=self.ImgBackBtn,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: controller.show_frame("LoginFrame"),
+            relief="flat",
+        ).place(
+            x=convertSize(controller, 24),
+            y=convertSize(controller, 20),
+            width=convertSize(controller, 228),
+            height=convertSize(controller, 61),
+        )
+        # ------
 
-    # ---------- Entry Username
-    SignupEntry1Background = canvas.create_image(convertSize(800),
-                                                 convertSize(270),
-                                                 image=Signup_Entry)
+        # ---Entry username---
+        self.signupUserBg = self.canvas.create_image(
+            convertSize(controller, 800),
+            convertSize(controller, 270),
+            image=self.ImgSignupEntry,
+        )
+        self.signupUserEntry = tk.Entry(master=self,
+                                        bd=0,
+                                        bg="#ffffff",
+                                        highlightthickness=0,
+                                        font=controller.entryFontSize)
+        self.signupUserEntry.place(
+            x=convertSize(controller, 536),
+            y=convertSize(controller, 226) + controller.entryDiscrenpancy,
+            width=convertSize(controller, 528),
+            height=controller.entryHeight,
+        )
+        # ------
 
-    SignupEntry1 = Entry(bd=0,
-                         bg="#ffffff",
-                         highlightthickness=0,
-                         font=(EntryFontSize))
-    SignupEntry1.place(
-        x=convertSize(536),
-        y=convertSize(226) + EntryDiscrepancy,
-        width=convertSize(528),
-        height=EntryHeight,
-    )
+        # ---Entry password---
+        self.signupPswdBg = self.canvas.create_image(
+            convertSize(controller, 800),
+            convertSize(controller, 429),
+            image=self.ImgSignupEntry,
+        )
+        self.signupPswdEntry = tk.Entry(master=self,
+                                        bd=0,
+                                        bg="#ffffff",
+                                        highlightthickness=0,
+                                        font=controller.entryFontSize)
+        self.signupPswdEntry.place(
+            x=convertSize(controller, 536),
+            y=convertSize(controller, 385) + controller.entryDiscrenpancy,
+            width=convertSize(controller, 528),
+            height=controller.entryHeight,
+        )
+        # ------
 
-    # ---------- Entry Password
-    SignupEntry2Background = canvas.create_image(convertSize(800),
-                                                 convertSize(429),
-                                                 image=Signup_Entry)
+        # ---Entry Bank number---
+        self.signupBankBg = self.canvas.create_image(
+            convertSize(controller, 800),
+            convertSize(controller, 590),
+            image=self.ImgSignupEntry,
+        )
+        self.signupBankEntry = tk.Entry(master=self,
+                                        bd=0,
+                                        bg="#ffffff",
+                                        highlightthickness=0,
+                                        font=controller.entryFontSize)
+        self.signupBankEntry.place(
+            x=convertSize(controller, 536),
+            y=convertSize(controller, 546) + controller.entryDiscrenpancy,
+            width=convertSize(controller, 528),
+            height=controller.entryHeight,
+        )
 
-    SignupEntry2 = Entry(bd=0,
-                         bg="#ffffff",
-                         highlightthickness=0,
-                         font=(EntryFontSize))
-    SignupEntry2.place(
-        x=convertSize(536),
-        y=convertSize(385) + EntryDiscrepancy,
-        width=convertSize(528),
-        height=EntryHeight,
-    )
+        # ---Submit button---
+        self.submitBtn = tk.Button(master=self,
+                                   image=self.ImgSubmitBtn,
+                                   borderwidth=0,
+                                   highlightthickness=0,
+                                   command=self.Submit,
+                                   relief="flat").place(
+                                       x=convertSize(controller, 520),
+                                       y=convertSize(controller, 705),
+                                       width=convertSize(controller, 560),
+                                       height=convertSize(controller, 88))
 
-    # ---------- Entry Bank Account
-    SignupEntry3Background = canvas.create_image(convertSize(800),
-                                                 convertSize(590),
-                                                 image=Signup_Entry)
-
-    SignupEntry3 = Entry(bd=0,
-                         bg="#ffffff",
-                         highlightthickness=0,
-                         font=(EntryFontSize))
-    SignupEntry3.place(
-        x=convertSize(536),
-        y=convertSize(546) + EntryDiscrepancy,
-        width=convertSize(528),
-        height=EntryHeight,
-    )
-
-    def checkFieldValid(typeCheck, userInput):
-        if typeCheck == "username":
-            if len(userInput) < 5:
-                messagebox.showinfo(
-                    "Invalid input",
-                    "Username must have at least 5 characters and contain letters (a-z), numbers (0-9)",
-                )
-                return False
-            elif (all(c.isnumeric() or c.islower()
-                      for c in userInput)) == False:
-                messagebox.showinfo(
-                    "Invalid input",
-                    "Username must have at least 5 characters and contain letters (a-z), numbers (0-9)",
-                )
-                return False
-
-        elif typeCheck == "password":
-            if len(userInput) < 3:
-                messagebox.showinfo(
-                    "Invalid input",
-                    "Password must have at least 3 characters")
-                return False
-
-        elif typeCheck == "bank":
-            if len(userInput) != 10:
-                messagebox.showinfo(
-                    "Invalid input",
-                    "Bank account must have 10 characters and contain numbers (0-9)",
-                )
-                return False
-            elif userInput.isnumeric() == False:
-                messagebox.showinfo(
-                    "Invalid input",
-                    "Bank account must have 10 characters and contain numbers (0-9)",
-                )
-                return False
-
-    def submitForm():
-        usernameInput = SignupEntry1.get()
-        passwordInput = SignupEntry2.get()
-        bankInput = SignupEntry3.get()
-        print(usernameInput, passwordInput, bankInput)
-        if checkFieldValid("username", usernameInput) == False:
-            return
-        if checkFieldValid("password", passwordInput) == False:
-            return
-        if checkFieldValid("bank", bankInput) == False:
-            return
-
-        print("Submitted !")
-
-    # ---------- BUTTON "Submit"
-    SignupSubmitButton = Button(
-        image=Signup_SubmitButton,
-        borderwidth=0,
-        highlightthickness=0,
-        command=submitForm,
-        relief="flat",
-    ).place(
-        x=convertSize(520),
-        y=convertSize(705),
-        width=convertSize(560),
-        height=convertSize(88),
-    )
+    def Submit(self):
+        username = self.signupUserEntry.get()
+        password = self.signupPswdEntry.get()
+        bank = self.signupBankEntry.get()
+        print(username, password, bank)
+        valid, pop_up = Register(client, username, password, bank)
+        print(pop_up)
+        if not valid:
+            messagebox.showinfo("Invalid input", pop_up)
+        else: messagebox.showinfo("Register status", pop_up)
 
 
 if __name__ == "__main__":
-    window = Tk()
-
-    # ==================== Constants Declaration ====================#
-    scaleRate = 0.8
-    frameWidth = window.winfo_screenwidth() * scaleRate
-    frameHeight = (window.winfo_screenwidth() * scaleRate) * 9 / 16
-    fontSize = convertSize(40)
-    geometry = f"{floor(frameWidth)}" + "x" + f"{floor(frameHeight)}"
-
-    EntryHeight = convertSize(60)
-    EntryFontSize = f"{convertSize(80)}"
-    EntryDiscrepancy = convertSize(12)
-
-    # ==================== Image Declaration ====================#
-
-    # ========================= Screen ==========================#
-    window.geometry(geometry)
-    window.configure(bg="#ffffff")
-
-    print(window.winfo_screenwidth(), window.winfo_screenheight())
-    window.resizable(False, False)
-    LoginScreen()
-    window.mainloop()
+    connected = True
+    app = App()
+    app.mainloop()
