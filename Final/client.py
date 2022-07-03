@@ -562,10 +562,24 @@ class HotelPageFrame(tk.Frame):
         # ------
 
         # ---Pagination button---
-        self.next_btn = tk.Button(master=self, text="NEXT", font=("Noto Sans SemiBold", convert_size(window, 16)), image=self.ImgClicked, compound=tk.CENTER,
-                                  borderwidth=0, highlightthickness=0, command=lambda: controller.go_to_page(self.page_number+1), relief="flat")
-        self.prev_btn = tk.Button(master=self, text="PREV", font=("Noto Sans SemiBold", convert_size(window, 16)), image=self.ImgClicked, compound=tk.CENTER,
-                                  borderwidth=0, highlightthickness=0, command=lambda: controller.go_to_page(self.page_number-1), relief="flat")
+        self.next_btn = tk.Button(master=self,
+                                  text="NEXT", 
+                                  font=("Noto Sans SemiBold", convert_size(window, 16)), 
+                                  image=self.ImgClicked, 
+                                  compound=tk.CENTER,
+                                  borderwidth=0, 
+                                  highlightthickness=0, 
+                                  command=lambda: controller.go_to_page(self.page_number+1), 
+                                  relief="flat")
+        self.prev_btn = tk.Button(master=self,
+                                  text="PREV", 
+                                  font=("Noto Sans SemiBold", convert_size(window, 16)), 
+                                  image=self.ImgClicked, 
+                                  compound=tk.CENTER,
+                                  borderwidth=0, 
+                                  highlightthickness=0, 
+                                  command=lambda: controller.go_to_page(self.page_number-1), 
+                                  relief="flat")
 
         self.page_label = tk.Label(master=self, text=f"{self.page_number}", image=self.ImgClicked, compound=tk.CENTER, font=("Noto Sans SemiBold", convert_size(window, 16)))
         self.page_label.place(x=convert_size(window, 506 + 102*2), y=convert_size(window, 780),
