@@ -135,15 +135,16 @@ def ShowHotelList(client):
         return
     hotels = json.loads(data)
     first = True
-    for hotel in hotels:
-        if not first:
-            print("-" * 10)
-        else:
-            first = False
-        print(f"ID: {hotel['ID']}")
-        print(f"Name: {hotel['NAME']}")
-        print(f"Description: {hotel['DESC']}")
-        print(f"Is available: {hotel['AVAILABLE']}")
+    # for hotel in hotels:
+    #     if not first:
+    #         print("-" * 10)
+    #     else:
+    #         first = False
+    #     print(f"ID: {hotel['ID']}")
+    #     print(f"Name: {hotel['NAME']}")
+    #     print(f"Description: {hotel['DESC']}")
+    #     print(f"Is available: {hotel['AVAILABLE']}")
+    return hotels
 
 
 def ShowBooked(client, username):
