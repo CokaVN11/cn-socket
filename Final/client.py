@@ -452,10 +452,10 @@ class CardFrame(tk.Frame):
         self.desc_x = convert_size(controller, 103 - 81)
         self.desc_y = convert_size(controller, 500 - 163 - 12)
 
-        self.tag_available_x = convert_size(controller, (324 - 81) + (161 / 2))
-        self.tag_available_y = convert_size(controller, (364 - 163) + (42 / 2))
-        self.tag_full_x = convert_size(controller, (394 - 81) + (91 / 2))
-        self.tag_full_y = convert_size(controller, (364 - 163) + (42 / 2))
+        # self.tag_available_x = convert_size(controller, (324 - 81) + (161 / 2))
+        # self.tag_available_y = convert_size(controller, (364 - 163) + (42 / 2))
+        # self.tag_full_x = convert_size(controller, (394 - 81) + (91 / 2))
+        # self.tag_full_y = convert_size(controller, (364 - 163) + (42 / 2))
 
         self.btn_x = convert_size(controller, 289 - 81)
         self.btn_y = convert_size(controller, 644 - 163)
@@ -486,24 +486,26 @@ class CardFrame(tk.Frame):
         self.card_thumbnail = self.canvas.create_image(self.thumbnail_x,
                                                        self.thumbnail_y,
                                                        image=self.ImgThumbnail)
-        if self.card_status:
-            # Tag available
-            self.card_tag = self.canvas.create_image(self.tag_available_x, self.tag_available_y,
-                                                     image=self.ImgAvailable)
-            # Button Lookup
-            self.lookupBtn = tk.Button(master=self, image=self.ImgLookupBtn, borderwidth=0, highlightthickness=0,
-                                       command=lambda: btn_clicked(), relief="flat")
-            self.lookupBtn.place(x=self.btn_x, y=self.btn_y, width=convert_size(controller, 197),
-                                 height=convert_size(controller, 65))
-        else:
-            # Tag Full
-            self.card_tag = self.canvas.create_image(self.tag_full_x, self.tag_full_y,
-                                                     image=self.ImgFull)
-            # Button Lookup Disable
-            self.lookupBtn = tk.Button(master=self, image=self.ImgDisLookupBtn, borderwidth=0, highlightthickness=0,
-                                       relief="flat")
-            self.lookupBtn.place(x=self.btn_x, y=self.btn_y, width=convert_size(controller, 197),
-                                 height=convert_size(controller, 65))
+        # if self.card_status:
+        #     # Tag available
+        #     self.card_tag = self.canvas.create_image(self.tag_available_x, self.tag_available_y,
+        #                                              image=self.ImgAvailable)
+        
+        # Button Lookup
+        self.lookupBtn = tk.Button(master=self, image=self.ImgLookupBtn, borderwidth=0, highlightthickness=0,
+                                    command=lambda: btn_clicked(), relief="flat")
+        self.lookupBtn.place(x=self.btn_x, y=self.btn_y, width=convert_size(controller, 197),
+                                height=convert_size(controller, 65))
+        # else:
+        #     # Tag Full
+        #     self.card_tag = self.canvas.create_image(self.tag_full_x, self.tag_full_y,
+        #                                              image=self.ImgFull)
+        #     # Button Lookup Disable
+        #     self.lookupBtn = tk.Button(master=self, image=self.ImgDisLookupBtn, borderwidth=0, highlightthickness=0,
+        #                                relief="flat")
+        #     self.lookupBtn.place(x=self.btn_x, y=self.btn_y, width=convert_size(controller, 197),
+        #                          height=convert_size(controller, 65))
+
         # Card name
         self.name_label = tk.Label(master=self, text=self.card_name, foreground="#47423D", background="white",
                                    font=("Noto Sans Bold", convert_size(controller, 28)))
