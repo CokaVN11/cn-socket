@@ -1,8 +1,10 @@
+import datetime
 import tkinter as tk
 from tkinter import messagebox
 from math import floor, ceil
 from PIL import Image, ImageTk
 from client_method import *
+from tkcalendar import Calendar
 
 
 def convert_size(window, original_size):
@@ -46,6 +48,7 @@ class App(tk.Tk):
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.geometry(self.resolution)
+        self.iconbitmap(r"./assets/booking.ico")
         # self.configure(bg="#ffffff")
         self.resizable(False, False)
 
@@ -123,25 +126,16 @@ class LoginFrame(tk.Frame):
         # ------
 
         # ---Background---
-        self.LoginBg = self.canvas.create_image(
-            convert_size(controller, 724),
-            convert_size(controller, 450),
-            image=self.ImgLoginBg,
-        )
+        self.LoginBg = self.canvas.create_image(convert_size(controller, 724),
+                                                convert_size(controller, 450),
+                                                image=self.ImgLoginBg)
 
         # ---Entry username---
-        self.UserEntryBg = self.canvas.create_image(
-            convert_size(controller, 1201),
-            convert_size(controller, 304),
-            image=self.ImgEntry,
-        )
-        self.UserEntry = tk.Entry(
-            master=self,
-            bd=0,
-            bg="#ffffff",
-            highlightthickness=0,
-            font=controller.entryFontSize,
-        )
+        self.UserEntryBg = self.canvas.create_image(convert_size(controller, 1201),
+                                                    convert_size(controller, 304),
+                                                    image=self.ImgEntry
+                                                    )
+        self.UserEntry = tk.Entry(master=self, bd=0, bg="#ffffff", highlightthickness=0, font=controller.entryFontSize)
         self.UserEntry.place(
             x=convert_size(controller, 962),
             y=convert_size(controller, 262) + controller.entryDiscrenpancy,
@@ -173,34 +167,23 @@ class LoginFrame(tk.Frame):
 
         # --- BUTTON "Login" ---
         self.LoginLoginBtn = tk.Button(
-            master=self,
-            image=self.ImgLoginBtn,
-            borderwidth=0,
-            highlightthickness=0,
-            command=self.submitLogin,
-            relief="flat",
+            master=self, image=self.ImgLoginBtn,
+            borderwidth=0, highlightthickness=0,
+            command=self.submitLogin, relief="flat",
         )
         self.LoginLoginBtn.place(
-            x=convert_size(controller, 946),
-            y=convert_size(controller, 572),
-            width=convert_size(controller, 510),
-            height=convert_size(controller, 84),
+            x=convert_size(controller, 946), y=convert_size(controller, 572),
+            width=convert_size(controller, 510), height=convert_size(controller, 84),
         )
         # ------
         # --- BUTTON "Create one" ---
         self.LoginSignupBtn = tk.Button(
-            master=self,
-            image=self.ImgSignupBtn,
-            borderwidth=0,
-            highlightthickness=0,
-            command=lambda: controller.show_frame("SignupFrame"),
-            relief="flat",
+            master=self, image=self.ImgSignupBtn, borderwidth=0, highlightthickness=0,
+            command=lambda: controller.show_frame("SignupFrame"), relief="flat",
         )
         self.LoginSignupBtn.place(
-            x=convert_size(controller, 1302),
-            y=convert_size(controller, 788),
-            width=convert_size(controller, 129),
-            height=convert_size(controller, 38),
+            x=convert_size(controller, 1302), y=convert_size(controller, 788),
+            width=convert_size(controller, 129), height=convert_size(controller, 38),
         )
         # ------
 
@@ -211,7 +194,7 @@ class LoginFrame(tk.Frame):
         valid, pop_up, username = Login(client, username_input, password_input)
         print(pop_up)
         if not valid:
-            messagebox.showinfo("Invalid input", pop_up)
+            messagebox.showwarning("Invalid input", pop_up)
         else:
             messagebox.showinfo("Login status", pop_up)
             if username:
@@ -440,6 +423,7 @@ class MenuFrame(tk.Frame):
 class CardFrame(tk.Frame):
     def __init__(self, parent, controller, column, card_name, card_description, card_status, card_thumbnail_path):
         tk.Frame.__init__(self, parent)
+        self.popup_screen = None
         self.controller = controller
 
         # ---CARD Constants---
@@ -490,12 +474,12 @@ class CardFrame(tk.Frame):
         #     # Tag available
         #     self.card_tag = self.canvas.create_image(self.tag_available_x, self.tag_available_y,
         #                                              image=self.ImgAvailable)
-        
+
         # Button Lookup
-        self.lookupBtn = tk.Button(master=self, image=self.ImgLookupBtn, borderwidth=0, highlightthickness=0,
-                                    command=lambda: btn_clicked(), relief="flat")
+        self.lookupBtn = tk.Button(master=self, image=self.ImgLookupBtn, borderwidth=0,
+                                   highlightthickness=0, command=lambda: self.popup_date(), relief="flat")
         self.lookupBtn.place(x=self.btn_x, y=self.btn_y, width=convert_size(controller, 197),
-                                height=convert_size(controller, 65))
+                             height=convert_size(controller, 65))
         # else:
         #     # Tag Full
         #     self.card_tag = self.canvas.create_image(self.tag_full_x, self.tag_full_y,
@@ -517,6 +501,17 @@ class CardFrame(tk.Frame):
                                    font=("Hind Guntur Medium", convert_size(controller, 16)))
         self.desc_label.place(x=self.desc_x, y=self.desc_y)
         # ------
+
+    def popup_date(self):
+        self.popup_screen = DatePopup(self, self.controller)
+        self.wait_window(self.popup_screen.top)
+        self.desc_label.config(text=f"{self.arrival_value()}-{self.depart_value()}")
+
+    def arrival_value(self):
+        return self.popup_screen.arrival_date
+
+    def depart_value(self):
+        return self.popup_screen.depart_date
 
 
 class HotelPageFrame(tk.Frame):
@@ -552,8 +547,10 @@ class HotelPageFrame(tk.Frame):
         self.cards = {}
         column = 0
         for i in self.hotels:
-            self.cards[i['ID']] = CardFrame(self, window, i['ID'], i['NAME'], f"{i['DESC']} {self.page_number}", int(i['AVAILABLE']), "./assets/LOH_thumbnail1.png")
-            self.cards[i['ID']].place(x=self.first_card_x + self.card_discrepancy * column, y=self.first_card_y, width=self.card_width, height=self.card_height)
+            self.cards[i['ID']] = CardFrame(self, window, i['ID'], i['NAME'], f"{i['DESC']} {self.page_number}",
+                                            int(i['AVAILABLE']), "./assets/LOH_thumbnail1.png")
+            self.cards[i['ID']].place(x=self.first_card_x + self.card_discrepancy * column, y=self.first_card_y,
+                                      width=self.card_width, height=self.card_height)
             column += 1
 
         # ---Declare button image---
@@ -562,6 +559,7 @@ class HotelPageFrame(tk.Frame):
         # ------
 
         # ---Pagination button---
+<<<<<<< Updated upstream
         self.next_btn = tk.Button(master=self,
                                   text="NEXT", 
                                   font=("Noto Sans SemiBold", convert_size(window, 16)), 
@@ -583,10 +581,24 @@ class HotelPageFrame(tk.Frame):
 
         self.page_label = tk.Label(master=self, text=f"{self.page_number}", image=self.ImgClicked, compound=tk.CENTER, font=("Noto Sans SemiBold", convert_size(window, 16)))
         self.page_label.place(x=convert_size(window, 506 + 102*2), y=convert_size(window, 780),
+=======
+        self.next_btn = tk.Button(master=self, text="NEXT", font=("Noto Sans SemiBold", convert_size(window, 16)),
+                                  image=self.ImgClicked, compound=tk.CENTER,
+                                  borderwidth=0, highlightthickness=0,
+                                  command=lambda: controller.go_to_page(self.page_number + 1), relief="flat")
+        self.prev_btn = tk.Button(master=self, text="PREV", font=("Noto Sans SemiBold", convert_size(window, 16)),
+                                  image=self.ImgClicked, compound=tk.CENTER,
+                                  borderwidth=0, highlightthickness=0,
+                                  command=lambda: controller.go_to_page(self.page_number - 1), relief="flat")
+
+        self.page_label = tk.Label(master=self, text=f"{self.page_number}", image=self.ImgClicked, compound=tk.CENTER,
+                                   font=("Noto Sans SemiBold", convert_size(window, 16)))
+        self.page_label.place(x=convert_size(window, 506 + 102 * 2), y=convert_size(window, 780),
+>>>>>>> Stashed changes
                               width=convert_size(window, 76), height=convert_size(window, 76))
-        self.next_btn.place(x=convert_size(window, 506 + 102*3), y=convert_size(window, 780),
+        self.next_btn.place(x=convert_size(window, 506 + 102 * 3), y=convert_size(window, 780),
                             width=convert_size(window, 76), height=convert_size(window, 76))
-        self.prev_btn.place(x=convert_size(window, 506 + 102*1), y=convert_size(window, 780),
+        self.prev_btn.place(x=convert_size(window, 506 + 102 * 1), y=convert_size(window, 780),
                             width=convert_size(window, 76), height=convert_size(window, 76))
 
     def Back(self):
@@ -601,7 +613,7 @@ class HotelListFrame(tk.Frame):
         self.hotel_list = self.controller.hotel_list
 
         self.begin_page = 1
-        self.end_page = ceil(len(self.hotel_list)/3)
+        self.end_page = ceil(len(self.hotel_list) / 3)
         print(self.begin_page, self.end_page)
         self.__create_widgets_(controller)
 
@@ -613,13 +625,17 @@ class HotelListFrame(tk.Frame):
 
         self.frames = {}
 
-        for F in range(self.begin_page, self.end_page+1):
-            mini_hotel_list = self.hotel_list[F*3 - 3:F*3 - 3 +3]
+        for F in range(self.begin_page, self.end_page + 1):
+            mini_hotel_list = self.hotel_list[F * 3 - 3:F * 3]
             print(mini_hotel_list)
-            frame = HotelPageFrame(parent=container, window=controller, controller=self, page_number=F, hotel_list=mini_hotel_list)
+            frame = HotelPageFrame(parent=container, window=controller, controller=self, page_number=F,
+                                   hotel_list=mini_hotel_list)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
+        tk.Label(master=self, text=f"{self.controller.username}",
+                 font=("Noto Sans SemiBold", 20), background="#ffffff").place(x=convert_size(controller, 1420),
+                                                                              y=convert_size(controller, 40))
         self.go_to_page(self.begin_page)
 
     def go_to_page(self, page_number):
@@ -629,6 +645,95 @@ class HotelListFrame(tk.Frame):
             print(f"Go to {page_number}")
             frame = self.frames[page_number]
             frame.tkraise()
+
+
+class DatePopup:
+    def __init__(self, master, window):
+
+        self.top = tk.Toplevel(master)
+        # print("Pop up")
+        self.depart_date = None
+        self.arrival_date = None
+
+        self.current_time = datetime.datetime.now()
+        self.arrival_chose = False
+        self.depart_chose = False
+
+        # ---Arrival calendar---
+        # --Title--
+        self.arrival_title = tk.Label(self.top, text="CHOOSE ARRIVAL DATE: ",
+                                      font=("Noto Sans Bold", convert_size(window, 16)))
+        self.arrival_title.grid(row=0, column=0, pady=10)
+
+        # --Calendar--
+        self.arrival_calendar = Calendar(self.top, selectmode='day', font=f"{convert_size(window, 14)}",
+                                         year=self.current_time.year, month=self.current_time.month,
+                                         day=self.current_time.day, date_pattern="dd/mm/yyyy",
+                                         showweeknumbers=0, borderwidth=0, background="white", foreground="gray1",
+                                         selectbackground="#1294F2", selectforeground="ghost white",
+                                         headersbackground="white", headersforeground="black",
+                                         cursor="hand2", relief="ridge")
+        self.arrival_calendar.grid(row=1, column=0, padx=12)
+
+        # --Label--
+        self.arrival_label = tk.Label(self.top, text="", font=("Noto Sans Bold", convert_size(window, 14)))
+        self.arrival_label.grid(row=2, column=0, pady=20)
+
+        # --Button--
+        self.arrival_btn = tk.Button(self.top, text="Choose", font=("Noto Sans Bold", convert_size(window, 20)),
+                                     command=lambda: self.show_arrival_date(), relief="ridge")
+        self.arrival_btn.grid(row=3, column=0)
+
+        # ---Departure calendar---
+        # --Title--
+        self.departure_title = tk.Label(self.top, text="CHOOSE DEPARTURE DATE: ",
+                                        font=("Noto Sans Bold", convert_size(window, 16)))
+        self.departure_title.grid(row=0, column=2, pady=10)
+
+        # --Calendar--
+        self.depart_calendar = Calendar(self.top, selectmode='day', font=f"{convert_size(window, 14)}",
+                                        year=self.current_time.year, month=self.current_time.month,
+                                        day=self.current_time.day + 3, date_pattern="dd/mm/yyyy",
+                                        showweeknumbers=0, borderwidth=0, background="white", foreground="gray1",
+                                        selectbackground="#1294F2", selectforeground="ghost white",
+                                        headersbackground="white", headersforeground="black",
+                                        cursor="hand2", relief="ridge")
+        self.depart_calendar.grid(row=1, column=2, padx=12)
+        # --Label--
+        self.depart_label = tk.Label(self.top, text="", font=("Noto Sans Bold", convert_size(window, 14)))
+        self.depart_label.grid(row=2, column=2, pady=20)
+        # --Button--
+        self.depart_btn = tk.Button(self.top, text="Choose", font=("Noto Sans Bold", convert_size(window, 20)),
+                                    command=lambda: self.show_depart_date(), relief="ridge")
+        self.depart_btn.grid(row=3, column=2)
+        # ------
+
+        # ---Confirm button---
+        self.confirm_btn = tk.Button(self.top, text="Confirm", font=convert_size(window, 15),
+                                     command=self.confirm_and_out, relief="ridge")
+        self.confirm_btn.grid(row=4, column=1, pady=20)
+
+        # ------
+
+    def show_arrival_date(self):
+        self.arrival_chose = True
+        self.arrival_label.config(text=f"Selected Arrival Date: {self.arrival_calendar.get_date()}")
+
+    def show_depart_date(self):
+        self.depart_chose = True
+        self.depart_label.config(text=f"Selected Departure Date: {self.depart_calendar.get_date()}")
+
+    def confirm_and_out(self):
+        self.arrival_date = self.arrival_calendar.get_date()
+        self.depart_date = self.depart_calendar.get_date()
+
+        if not self.arrival_chose:
+            self.arrival_label.config(text="You haven't chosen Arrival Date")
+            return
+        if not self.depart_chose:
+            self.depart_label.config(text="You haven't chosen Departure Date")
+            return
+        self.top.destroy()
 
 
 if __name__ == "__main__":
