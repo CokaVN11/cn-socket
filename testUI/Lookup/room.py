@@ -1,5 +1,6 @@
-from tkinter import *
 from math import floor
+from tkinter import *
+
 from PIL import Image, ImageTk
 
 window = Tk()
@@ -42,50 +43,46 @@ canvas = Canvas(
     relief="ridge")
 canvas.place(x=0, y=0)
 
-
-#==================================================================#
+# ==================================================================#
 # Button "Back"
 ImgBackBtn = convertImage("LK_BackBtn.png", 227, 55)
 backBtn = Button(
-    image = ImgBackBtn,
-    borderwidth = 0,
-    highlightthickness = 0,
-    command = btn_clicked,
-    relief = "flat"
+    image=ImgBackBtn,
+    borderwidth=0,
+    highlightthickness=0,
+    command=btn_clicked,
+    relief="flat"
 )
 backBtn.place(
-    x = convertSize(41), y = convertSize(44),
-    width = convertSize(227),
-    height = convertSize(55)
+    x=convertSize(41), y=convertSize(44),
+    width=convertSize(227),
+    height=convertSize(55)
 )
 
 # Button "Cart"
 ImgCart = convertImage("LK_Cart.png", 109, 109)
 cartBtn = Button(
-    image = ImgCart,
-    borderwidth = 0,
-    highlightthickness = 0,
-    command = btn_clicked,
-    relief = "flat"
+    image=ImgCart,
+    borderwidth=0,
+    highlightthickness=0,
+    command=btn_clicked,
+    relief="flat"
 )
 cartBtn.place(
-    x = convertSize(1462), y = convertSize(30),
-    width = convertSize(109),
-    height = convertSize(109)
+    x=convertSize(1462), y=convertSize(30),
+    width=convertSize(109),
+    height=convertSize(109)
 )
-
 
 # Title Hotel name
 hotelName = Label(
     # window,
-    text = "#Hotel name",
+    text="#Hotel name",
     foreground="#47423D",
     background="#ffffff",
     justify=CENTER,
     font=("Noto Sans SemiBold", convertSize(50))
-).pack(pady = 14)
-
-
+).pack(pady=14)
 
 # ==================== CARD Constants ====================#
 cardWidth = convertSize(1354)
@@ -132,8 +129,8 @@ ImgReserveBtn = convertImage("LK_ReserveBtn.png", 234, 68)
 ImgReserveDis = convertImage("LK_ReserveDisabled.png", 234, 68)
 
 
-def renderCard(Row, cardName, cardDescription, cardStatus, cardPrice, cardThumbPath, cardBed, cardArea, cardGuest):
-
+def renderCard(Row, cardName, cardDescription, cardStatus, cardPrice,
+               cardThumbPath, cardBed, cardArea, cardGuest):
     # CARD ITEM FRAME
     cardFrame = Frame()
     cardFrame.place(
@@ -193,7 +190,7 @@ def renderCard(Row, cardName, cardDescription, cardStatus, cardPrice, cardThumbP
     # Card Description
     card_Desc = Label(
         master=cardFrame,
-        text = cardDescription,
+        text=cardDescription,
         foreground="#7D8693",
         background="#ffffff",
         justify=LEFT,
@@ -208,23 +205,23 @@ def renderCard(Row, cardName, cardDescription, cardStatus, cardPrice, cardThumbP
     card_Price = Label(
         master=cardFrame,
         anchor="e",
-        text = cardPrice,
+        text=cardPrice,
         foreground="#35bdda",
         background="white",
         justify=RIGHT,
         font=("Noto Sans Bold", convertSize(50)),
-        width= convertSize(8)
+        width=convertSize(8)
     ).place(
         anchor="e",
         x=pricePosX,
         y=pricePosY,
-        height = convertSize(80)
+        height=convertSize(80)
     )
 
     # Card Bed
     card_Bed = Label(
         master=cardFrame,
-        text = cardBed,
+        text=cardBed,
         foreground="#8f8f8f",
         background="#ffffff",
         justify=LEFT,
@@ -237,7 +234,7 @@ def renderCard(Row, cardName, cardDescription, cardStatus, cardPrice, cardThumbP
     # Card Area
     card_Area = Label(
         master=cardFrame,
-        text = cardArea,
+        text=cardArea,
         foreground="#8f8f8f",
         background="#ffffff",
         justify=LEFT,
@@ -250,7 +247,7 @@ def renderCard(Row, cardName, cardDescription, cardStatus, cardPrice, cardThumbP
     # Card Guest
     card_Guest = Label(
         master=cardFrame,
-        text = cardGuest,
+        text=cardGuest,
         foreground="#8f8f8f",
         background="#ffffff",
         justify=LEFT,
@@ -264,47 +261,38 @@ def renderCard(Row, cardName, cardDescription, cardStatus, cardPrice, cardThumbP
         # Button "Reserve"
         reserveBtn = Button(
             master=cardFrame,
-            image = ImgReserveBtn,
-            borderwidth = 0,
-            highlightthickness = 0,
-            command = btn_clicked,
-            relief = "flat"
+            image=ImgReserveBtn,
+            borderwidth=0,
+            highlightthickness=0,
+            command=btn_clicked,
+            relief="flat"
         )
         reserveBtn.place(
-            x = cardBtnX,
-            y = cardBtnY,
-            width = convertSize(234),
-            height = convertSize(68)
+            x=cardBtnX,
+            y=cardBtnY,
+            width=convertSize(234),
+            height=convertSize(68)
         )
     else:
         # Button "Reserve DISABLED"
         reserveBtnDisabled = Button(
             master=cardFrame,
-            image = ImgReserveDis,
-            borderwidth = 0,
-            highlightthickness = 0,
-            command = btn_clicked,
-            relief = "flat"
+            image=ImgReserveDis,
+            borderwidth=0,
+            highlightthickness=0,
+            command=btn_clicked,
+            relief="flat"
         )
         reserveBtnDisabled.place(
-            x = cardBtnX,
-            y = cardBtnY,
-            width = convertSize(234),
-            height = convertSize(68)
+            x=cardBtnX,
+            y=cardBtnY,
+            width=convertSize(234),
+            height=convertSize(68)
         )
 
 
 renderCard(1, "Single Room", "For single person", 1, "$100", "#Thumbnail", "1 Bed", "68 m2", "2 Guest")
 renderCard(2, "V.I.P Room", "Hehe", 0, "$1000", "#Thumbnail", "2 Bed", "86 m2", "4 Guest")
-
-
-
-
-
-
-
-
-
 
 window.resizable(False, False)
 window.mainloop()
