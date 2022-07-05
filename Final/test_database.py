@@ -10,8 +10,8 @@ import ciso8601
 import sys
 
 special_char = re.compile("[@_!#$%^&*()<>?/\|}{~:]")
-# hotel_names = ["Lake Place", "Diamond", "Rubidi", "Samochy",
-#                "GoRo", "Hikoga", "Holly Good", "Raxle", "Ankani", "Wonder Koll"]
+hotel_names = ["Lake Place", "Diamond", "Rubidi", "Samochy",
+               "GoRo", "Hikoga", "Holly Good", "Raxle", "Ankani", "Wonder Koll"]
 
 # hotel_names = ["Mount Place", "Prism", "Hokaido", "Alaski", "Chill Home",
 #                "Relax Spring", "Okaimi", "Rilax", "Glutami", "Amaze Koll", "Aquamarine Tower", "Northern Shrine", "Lord's Palms", "Emerald Lagoon", "Antique Legacy", "Prince's Bazaar", "Solar", "Amenity", "Grand", "Summit"]
@@ -370,33 +370,36 @@ try:
     # rows = cx.fetchall()
     # for row in rows:
     #     print(row)
-    insert_cmd = "insert into RESERVATION values (?, ?, ?, ?, ?, ?, ?, ?)"
-    arrival = "11/07/2022"
+    # insert_cmd = "insert into RESERVATION values (?, ?, ?, ?, ?, ?, ?, ?)"
+    arrival = "4/07/2022"
     arrival_ts = datetime.datetime.strptime(arrival, "%d/%m/%Y").timestamp()
-    departure = "17/07/2022"
+    departure = "11/07/2022"
     departure_ts = datetime.datetime.strptime(departure, "%d/%m/%Y").timestamp()
-    username = "kn110"
-    hotel_id = "1"
-    room_id = "1"
-    quality = 2
-    room = cx.execute("select * from ROOM where HOTEL_ID = 1 and ID = 1").fetchone()
-    
-    update_cmd = f"""update ROOM
-    set VACANCIES = {room['VACANCIES'] - quality}
-    where HOTEL_ID = 1 and ID = 1
-    """
-    cx.execute(update_cmd)
-
-    total = quality * room['PRICE']
-    reservation = (timestamp, username, hotel_id, room_id, quality, arrival_ts, departure_ts, total)
-    print(reservation)
-    cx.execute(insert_cmd, reservation)
+    # username = "kn110"
+    # hotel_id = "1"
+    # room_id = "2"
+    # quality = 2
+    # room = cx.execute("select * from ROOM where HOTEL_ID = 1 and ID = 2").fetchone()
+    # #
+    # # update_cmd = f"""update ROOM
+    # # set VACANCIES = {room['VACANCIES'] - quality}
+    # # where HOTEL_ID = 1 and ID = 1
+    # # """
+    # # cx.execute(update_cmd)
+    # #
+    # total = quality * room['PRICE']
+    # reservation = (timestamp, username, hotel_id, room_id, quality, arrival_ts, departure_ts, total)
+    # print(reservation)
+    # cx.execute(insert_cmd, reservation)
+    # cx.execute("""update ROOM set VACANCIES = 2 where ID = 1""")
+    print(arrival_ts, departure_ts)
+    cx.execute(f"""update RESERVATION set DEPARTURE = {str(departure_ts)} where TOTAL = 200""")
 
     sqlConn.commit()
     cx.close()
 
 except sql.Error as error:
-    print(f"Error occured {error}")
+    print(f"Error occurred {error}")
 finally:
     if sqlConn:
         sqlConn.close()

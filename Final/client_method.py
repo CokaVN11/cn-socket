@@ -14,7 +14,7 @@ OPTIONS = {
     "login": "2",
     "hotel_list": "3",
     "reservation": "4",
-    "guide": "5"
+    "lookup": "5"
 }
 
 
@@ -134,7 +134,7 @@ def ShowHotelList(client):
     if data == b'empty':
         return
     hotels = json.loads(data)
-    first = True
+    # first = True
     # for hotel in hotels:
     #     if not first:
     #         print("-" * 10)
@@ -168,3 +168,19 @@ def ShowBooked(client, username):
         print(f"Departure day: {reserve['DEPARTURE']}")
         print(f"Quantity: {reserve['QUALITY']}")
         print(f"Total price: {reserve['TOTAL']}")
+
+
+def LookUpRoom(client, hotel_name, arrival_date, depart_date):
+    send_s(client, OPTIONS['lookup'])
+    send_s(client, hotel_name)
+    send_s(client, arrival_date)
+    send_s(client, depart_date)
+
+    len_data = int(recv_s(client))
+    data = client.recv(len_data)
+    if data == b'empty':
+        print("empty")
+        return []
+    rooms = json.loads(data)
+
+    return rooms

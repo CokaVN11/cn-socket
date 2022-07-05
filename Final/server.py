@@ -16,7 +16,7 @@ OPTIONS = {
     "login": "2",
     "hotel_list": "3",
     "reservation": "4",
-    "guide": "5"
+    "lookup": "5"
 }
 
 
@@ -69,9 +69,7 @@ def isExistTable(sqlConn: sqlite3.Connection, table: str):
         return False
 
 
-def isNewUser(
-    sqlConn: sqlite3.Connection, table: str, username: str, password: str, bank: int
-):
+def isNewUser(sqlConn: sqlite3.Connection, table: str, username: str):
     if sqlConn:
         cx = sqlConn.cursor()
         query = "SELECT * FROM " + table + " WHERE username LIKE '" + username + "'"
@@ -86,7 +84,7 @@ def isNewUser(
 
 
 def insertUserIntoTable(
-    sqlConn: sqlite3.Connection, name: str, password: str, bank: int
+        sqlConn: sqlite3.Connection, name: str, password: str, bank: int
 ):
     if sqlConn:
         cx = sqlConn.cursor()
@@ -137,7 +135,7 @@ def Register(conn, addr, sqlConn: sqlite3.Connection):
             print(
                 f"[{addr}] username = {username}, password = {password}, bank number = {bank}"
             )
-            if isNewUser(sqlConn, "USER", username, password, bank):
+            if isNewUser(sqlConn, "USER", username):
                 insertUserIntoTable(sqlConn, username, password, bank)
                 send_s(conn, "Oke")
             else:
@@ -146,6 +144,7 @@ def Register(conn, addr, sqlConn: sqlite3.Connection):
 
 def SendHotelList(conn, addr, sqlConn: sqlite3.Connection):
     if conn:
+        print(f"{addr} Get Hotel List")
         sqlConn.row_factory = sqlite3.Row
         cx = sqlConn.cursor()
 
@@ -169,6 +168,7 @@ def SendHotelList(conn, addr, sqlConn: sqlite3.Connection):
 
 def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
     if conn:
+        print(f"{addr} Get reservations")
         username = recv_s(conn)
         sqlConn.row_factory = sqlite3.Row
         cx = sqlConn.cursor()
@@ -208,6 +208,64 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
         cx.close()
 
 
+def isNotInOtherDatetime(arrival: datetime.datetime, departure: datetime.datetime,
+                         arrival_check: datetime.datetime, departure_check: datetime.datetime):
+    if departure < arrival_check < departure_check:
+        return True
+    if arrival > departure_check > arrival_check:
+        return True
+
+    return False
+
+
+def SendRoomList(conn, addr, sqlConn: sqlite3.Connection):
+    if conn:
+        print(f"{addr} Look up room list")
+        sqlConn.row_factory = sqlite3.Row
+        cx = sqlConn.cursor()
+
+        hotel_name = recv_s(conn)
+        arrival_date = recv_s(conn)
+        depart_date = recv_s(conn)
+
+        # ---Convert to datetime---
+        arrival_date = datetime.datetime.strptime(arrival_date, "%d/%m/%Y")
+        depart_date = datetime.datetime.strptime(depart_date, "%d/%m/%Y")
+
+        # print(hotel_name, type(arrival_date), depart_date)
+        cx.execute(f"""select ROOM.ID, ROOM.TYPE, ROOM.DESC, ROOM.VACANCIES, ROOM.PRICE
+                      from HOTEL, ROOM
+                      where HOTEL.NAME = '{hotel_name}' and HOTEL.ID = ROOM.HOTEL_ID""")
+        rooms = [dict(row) for row in cx]
+
+        cx.execute("""select RESERVATION.ROOM_ID, RESERVATION.QUALITY, RESERVATION.ARRIVAL, RESERVATION.DEPARTURE
+                      from RESERVATION, HOTEL
+                      where RESERVATION.HOTEL_ID = HOTEL.ID""")
+        reservations = [dict(row) for row in cx]
+
+        if len(rooms) == 0:
+            data = "empty"
+            send_s(conn, str(len(data)))
+            conn.sendall(data.encode(FORMAT))
+        else:
+            for reserve in reservations:
+                reserve['ARRIVAL'] = datetime.datetime.fromtimestamp(float(reserve['ARRIVAL']))
+                reserve['DEPARTURE'] = datetime.datetime.fromtimestamp(float(reserve['DEPARTURE']))
+                # print(reserve['ARRIVAL'], reserve['DEPARTURE'])
+
+            for room, reserve in zip(rooms, reservations):
+                if room['ID'] == reserve['ROOM_ID']:
+                    if not isNotInOtherDatetime(reserve['ARRIVAL'], reserve['DEPARTURE'], arrival_date, depart_date):
+                        room['VACANCIES'] -= reserve['QUALITY']
+
+            print(rooms)
+            print(reservations)
+            data = json.dumps([dict(ix) for ix in rooms if ix['VACANCIES'] > 0])
+            send_s(conn, str(len(data)))
+            conn.sendall(data.encode(FORMAT))
+        cx.close()
+
+
 def NavigateChoice(conn, addr, sqlConn: sqlite3.Connection, choice):
     if choice == OPTIONS["register"]:
         print(f"[{addr}] Registering")
@@ -221,8 +279,9 @@ def NavigateChoice(conn, addr, sqlConn: sqlite3.Connection, choice):
     elif choice == OPTIONS["reservation"]:
         print(f"[{addr}] Want to get booked room")
         SendBookedList(conn, addr, sqlConn)
-    elif choice == OPTIONS["guide"]:
-        print(f"[{addr}] Booking guide")
+    elif choice == OPTIONS["lookup"]:
+        # print(f"[{addr}] Booking guide")
+        SendRoomList(conn, addr, sqlConn)
     elif choice == "6":
         print(f"[{addr}] Log-outing")
 
