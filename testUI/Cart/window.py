@@ -19,7 +19,7 @@ def convertSize(originalSize):
 def convertImage(path, originalWidth, originalHeight):
     originalImage = Image.open(path)
     resizedImage = originalImage.resize((convertSize(originalWidth), convertSize(originalHeight)))
-    convertedImage = ImageTk.PhotoImage(resizedImage)    
+    convertedImage = ImageTk.PhotoImage(resizedImage)
     return convertedImage
 
 
@@ -32,26 +32,24 @@ geometry = f'{floor(windowWidth)}' + "x" + f'{floor(windowHeight)}'
 window.geometry(geometry)
 window.configure(bg="#ffffff")
 
-
-
 # ====================== Note Chia Frame ==========================#
 
-    ################### window ######################
-    #          Item Frame            #  Info Frame  #  
-    #                                #              #  
-    # #############################  #              #  
-    # #        Item Canvas        #S #              #  
-    # #                           #C #              #  
-    # #  #######################  #R #              #  
-    # #  #    Scrollable       #  #O #              #  
-    # #  #           Frame     #  #L #              #  
-    # #  #                     #  #L #              #  
-    # #  #   Thì xem cái frame #  #  #              #  
-    # #  #  này như là window  #  #B #              #  
-    # #  #                     #  #A #              #  
-    # #  #    Tạo ra trong     #  #R #              #  
-    # #  #  frame này những    #  #  #              #  
-    # #  #  cái card frame     #  #  #              #  
+################### window ######################
+#          Item Frame            #  Info Frame  #
+#                                #              #
+# #############################  #              #
+# #        Item Canvas        #S #              #
+# #                           #C #              #
+# #  #######################  #R #              #
+# #  #    Scrollable       #  #O #              #
+# #  #           Frame     #  #L #              #
+# #  #                     #  #L #              #
+# #  #   Thì xem cái frame #  #  #              #
+# #  #  này như là window  #  #B #              #
+# #  #                     #  #A #              #
+# #  #    Tạo ra trong     #  #R #              #
+# #  #  frame này những    #  #  #              #
+# #  #  cái card frame     #  #  #              #
 
 itemFrameWidth = convertSize(900)
 itemFrameHeight = convertSize(900)
@@ -59,17 +57,15 @@ itemFrameHeight = convertSize(900)
 infoFrameWidth = convertSize(700)
 infoFrameHeight = convertSize(900)
 
-
 itemFrame = Frame(window)
 itemFrame.place(x=0, y=0,
-                width=itemFrameWidth, 
+                width=itemFrameWidth,
                 height=itemFrameHeight)
 
 infoFrame = Frame(window)
-infoFrame.place(x=itemFrameWidth, y=0, 
-                width=infoFrameWidth, 
+infoFrame.place(x=itemFrameWidth, y=0,
+                width=infoFrameWidth,
                 height=infoFrameHeight)
-
 
 itemCanvas = Canvas(
     itemFrame,
@@ -93,18 +89,16 @@ infoCanvas = Canvas(
 )
 infoCanvas.place(x=0, y=0)
 
-
-
 # =================== Init Scrollbar for ItemFrame ======================#
-numberOfItem = 6    # The number of items in Cart
-scrollFrameHeight = convertSize(102 + numberOfItem*222)
+numberOfItem = 6  # The number of items in Cart
+scrollFrameHeight = convertSize(102 + numberOfItem * 222)
 
 scrollBar = Scrollbar(itemFrame, orient='vertical', command=itemCanvas.yview)
-scrollBar.pack(side = RIGHT, fill = Y)
+scrollBar.pack(side=RIGHT, fill=Y)
 
 scrollableFrame = Frame(itemCanvas,
-                        width=itemFrameWidth, 
-                        height=scrollFrameHeight, 
+                        width=itemFrameWidth,
+                        height=scrollFrameHeight,
                         background="white")
 # scrollableFrame.place(
 #     x = 0,
@@ -121,30 +115,27 @@ itemCanvas.create_window((0, 0), window=scrollableFrame, anchor="nw")
 
 itemCanvas.configure(yscrollcommand=scrollBar.set)
 
-
-
-
 # ================ Add widgets to scrollableFrame ==================#
-containerFrame = Frame(scrollableFrame, 
-                        width=itemFrameWidth, 
-                        height=scrollFrameHeight, 
-                        background="white")
-containerFrame.place(x = 0, y = 0)
+containerFrame = Frame(scrollableFrame,
+                       width=itemFrameWidth,
+                       height=scrollFrameHeight,
+                       background="white")
+containerFrame.place(x=0, y=0)
 
 # ========== Button "Back"
 ImgBackBtn = convertImage("Cart_backBtn.png", 137, 44)
 backBtn = Button(
     containerFrame,
-    image = ImgBackBtn,
-    borderwidth = 0,
-    highlightthickness = 0,
-    command = btn_clicked,
-    relief = "flat"
+    image=ImgBackBtn,
+    borderwidth=0,
+    highlightthickness=0,
+    command=btn_clicked,
+    relief="flat"
 )
 backBtn.place(
-    x = convertSize(43), y = convertSize(30),
-    width = convertSize(137),
-    height = convertSize(44)
+    x=convertSize(43), y=convertSize(30),
+    width=convertSize(137),
+    height=convertSize(44)
 )
 
 cardWidth = convertSize(819)
@@ -178,12 +169,13 @@ ImgThumbnail = convertImage("Cart_thumbnail.png", 819, 200)
 ImgIncreaseBtn = convertImage("Cart_increaseBtn.png", 28, 28)
 ImgDecreaseBtn = convertImage("Cart_decreaseBtn.png", 28, 28)
 
+
 def renderCard(Row, hotelName, typeRoom, arrivalDate, departureDate, quantityRoom, thumbnail, pricePerRoom):
     # CARD ITEM FRAME
     cardFrame = Frame(containerFrame)
     cardFrame.place(
         x=firstCardX,
-        y=firstCardY + cardDiscrepancy*(Row - 1),
+        y=firstCardY + cardDiscrepancy * (Row - 1),
         width=cardWidth,
         height=cardHeight)
 
@@ -198,18 +190,17 @@ def renderCard(Row, hotelName, typeRoom, arrivalDate, departureDate, quantityRoo
     )
     cardCanvas.place(x=0, y=0)
 
-
-    #========== Card Thumbnail
+    # ========== Card Thumbnail
     card_Thumbnail = cardCanvas.create_image(
         thumbnailX,
         thumbnailY,
-        image = ImgThumbnail
+        image=ImgThumbnail
     )
 
-    #========== Card Name
+    # ========== Card Name
     card_Name = Label(
         master=cardFrame,
-        text= f'{hotelName} ({typeRoom})',
+        text=f'{hotelName} ({typeRoom})',
         foreground="#47423D",
         background="#ffffff",
         justify=LEFT,
@@ -220,10 +211,10 @@ def renderCard(Row, hotelName, typeRoom, arrivalDate, departureDate, quantityRoo
         height=convertSize(60)
     )
 
-    #========== Card Date
+    # ========== Card Date
     card_Date = Label(
         master=cardFrame,
-        text = f"{arrivalDate} - {departureDate}",
+        text=f"{arrivalDate} - {departureDate}",
         foreground="#7D8693",
         background="#ffffff",
         justify=LEFT,
@@ -233,169 +224,165 @@ def renderCard(Row, hotelName, typeRoom, arrivalDate, departureDate, quantityRoo
         y=datePosY,
     )
 
-    #========== Card Price
+    # ========== Card Price
     money = "departDate - arrivalDate" * pricePerRoom
 
     card_Price = Label(
         master=cardFrame,
         anchor="e",
         # text = f"${quantityRoom * money}",
-        text = "$123",
+        text="$123",
         foreground="#35bdda",
         background="white",
         justify=RIGHT,
         font=("Noto Sans Bold", convertSize(30)),
-        width= convertSize(8)
+        width=convertSize(8)
     ).place(
         anchor="e",
         x=pricePosX,
         y=pricePosY,
-        height = convertSize(80)
+        height=convertSize(80)
     )
 
-
-    #========== Quantity Label (Dùng Canvas tạo text vì Label dính background)
+    # ========== Quantity Label (Dùng Canvas tạo text vì Label dính background)
     cardCanvas.create_text(
         quantityPosX,
         quantityPosY,
-        text = f"{quantityRoom}",
-        fill = "#000000",
+        text=f"{quantityRoom}",
+        fill="#000000",
         font=("Noto Sans Regular", convertSize(16))
     )
 
-
     # ========== Button "-"
     decreaseBtn = Button(
-        master = cardFrame,
-        image= ImgDecreaseBtn,
-        borderwidth = 0,
-        highlightthickness = 0,
-        command = btn_clicked,
-        relief = "flat"
+        master=cardFrame,
+        image=ImgDecreaseBtn,
+        borderwidth=0,
+        highlightthickness=0,
+        command=btn_clicked,
+        relief="flat"
     )
     decreaseBtn.place(
-        x = decreaseBtnX, 
-        y = decreaseBtnY,
-        width = convertSize(28),
-        height = convertSize(28)
+        x=decreaseBtnX,
+        y=decreaseBtnY,
+        width=convertSize(28),
+        height=convertSize(28)
     )
     # ========== Button "+"
     increaseBtn = Button(
-        master = cardFrame,
-        image = ImgIncreaseBtn,
-        borderwidth = 0,
-        highlightthickness = 0,
-        command = btn_clicked,
-        relief = "flat"
+        master=cardFrame,
+        image=ImgIncreaseBtn,
+        borderwidth=0,
+        highlightthickness=0,
+        command=btn_clicked,
+        relief="flat"
     )
     increaseBtn.place(
-        x = increaseBtnX, 
-        y = increaseBtnY,
-        width = convertSize(28),
-        height = convertSize(28)
+        x=increaseBtnX,
+        y=increaseBtnY,
+        width=convertSize(28),
+        height=convertSize(28)
     )
 
+
 # Chú ý biến numberOfItem ở line 99
-renderCard(1, "Lake Place", "Single Room", 
-            "04/07/2022", "07/07/2022", 2, "#thumbnailPath", 200)
-renderCard(2, "Lake Place", "Single Room", 
-            "04/07/2022", "07/07/2022", 1, "#thumbnailPath", 200)
-renderCard(3, "Lake Place", "Single Room", 
-            "04/07/2022", "07/07/2022", 12, "#thumbnailPath", 200)
-renderCard(4, "Lake Place", "Single Room", 
-            "04/07/2022", "07/07/2022", 2, "#thumbnailPath", 200)
-renderCard(5, "Lake Place", "V.I.P Room", 
-            "04/07/2022", "07/07/2022", 2, "#thumbnailPath", 200)
-renderCard(6, "Lake Place", "Single Room", 
-            "04/07/2022", "07/07/2022", 2, "#thumbnailPath", 200)
+renderCard(1, "Lake Place", "Single Room",
+           "04/07/2022", "07/07/2022", 2, "#thumbnailPath", 200)
+renderCard(2, "Lake Place", "Single Room",
+           "04/07/2022", "07/07/2022", 1, "#thumbnailPath", 200)
+renderCard(3, "Lake Place", "Single Room",
+           "04/07/2022", "07/07/2022", 12, "#thumbnailPath", 200)
+renderCard(4, "Lake Place", "Single Room",
+           "04/07/2022", "07/07/2022", 2, "#thumbnailPath", 200)
+renderCard(5, "Lake Place", "V.I.P Room",
+           "04/07/2022", "07/07/2022", 2, "#thumbnailPath", 200)
+renderCard(6, "Lake Place", "Single Room",
+           "04/07/2022", "07/07/2022", 2, "#thumbnailPath", 200)
 
-
-
-#==================== INFORMATION FRAME =====================#
+# ==================== INFORMATION FRAME =====================#
 ImgBackground = convertImage("Cart_background.png", 603, 516)
 ImgConfirmBtn = convertImage("Cart_confirmBtn.png", 455, 87)
 
-
 # ========== Background
 background = infoCanvas.create_image(
-    convertSize((950 - 900) + (603/2)), 
-    convertSize(134 + (516/2)),
+    convertSize((950 - 900) + (603 / 2)),
+    convertSize(134 + (516 / 2)),
     image=ImgBackground
 )
 
-#=========== Username
+# =========== Username
 infoUsername = Label(
     master=infoFrame,
     anchor="e",
-    text = "devilboiz",
+    text="devilboiz",
     foreground="#7D8693",
     background="#ffffff",
     justify=RIGHT,
     font=("Hind Guntur SemiBold", convertSize(22)),
-    width= convertSize(24)
+    width=convertSize(24)
 ).place(
     anchor="e",
     x=convertSize((1272 - 900) + 270),
     y=convertSize(213 + 20),
-    height = convertSize(40)
+    height=convertSize(40)
 )
 
-#=========== Bank Account
+# =========== Bank Account
 infoBankAccount = Label(
     master=infoFrame,
     anchor="e",
-    text = "1234567890",
+    text="1234567890",
     foreground="#7D8693",
     background="#ffffff",
     justify=RIGHT,
     font=("Hind Guntur SemiBold", convertSize(22)),
-    width= convertSize(24)
+    width=convertSize(24)
 ).place(
     anchor="e",
     x=convertSize((1272 - 900) + 270),
-    y=convertSize(213 + 20   + (262 - 213)),
-    height = convertSize(40)
+    y=convertSize(213 + 20 + (262 - 213)),
+    height=convertSize(40)
 )
 
-#=========== SubTotal
+# =========== SubTotal
 infoSubTotal = Label(
     master=infoFrame,
     anchor="e",
-    text = "$800",
+    text="$800",
     foreground="#7D8693",
     background="#ffffff",
     justify=RIGHT,
     font=("Hind Guntur SemiBold", convertSize(22)),
-    width= convertSize(24)
+    width=convertSize(24)
 ).place(
     anchor="e",
     x=convertSize((1272 - 900) + 270),
-    y=convertSize(213 + 20   +(463 - 213)),
-    height = convertSize(40)
+    y=convertSize(213 + 20 + (463 - 213)),
+    height=convertSize(40)
 )
 
-#=========== Tax
+# =========== Tax
 infoTax = Label(
     master=infoFrame,
     anchor="e",
-    text = "$80",
+    text="$80",
     foreground="#7D8693",
     background="#ffffff",
     justify=RIGHT,
     font=("Hind Guntur SemiBold", convertSize(22)),
-    width= convertSize(24)
+    width=convertSize(24)
 ).place(
     anchor="e",
     x=convertSize((1272 - 900) + 270),
-    y=convertSize(213 + 20   +(518 - 213)),
-    height = convertSize(40)
+    y=convertSize(213 + 20 + (518 - 213)),
+    height=convertSize(40)
 )
 
-#=========== Total
+# =========== Total
 infoTotal = Label(
     master=infoFrame,
     anchor="e",
-    text = "$880",
+    text="$880",
     foreground="#35BDDA",
     background="#ffffff",
     justify=RIGHT,
@@ -403,26 +390,24 @@ infoTotal = Label(
 ).place(
     anchor="e",
     x=convertSize((1272 - 900) + 270),
-    y=convertSize(213  +(594 - 213) + 36),
-    height = convertSize(60)
+    y=convertSize(213 + (594 - 213) + 36),
+    height=convertSize(60)
 )
 
 # ========== Button "Confirm"
 confirmBtn = Button(
     master=infoFrame,
-    image = ImgConfirmBtn,
-    borderwidth = 0,
-    highlightthickness = 0,
-    command = btn_clicked,
-    relief = "flat"
+    image=ImgConfirmBtn,
+    borderwidth=0,
+    highlightthickness=0,
+    command=btn_clicked,
+    relief="flat"
 )
 confirmBtn.place(
-    x = convertSize(1024 - 900), y = convertSize(691),
-    width = convertSize(455),
-    height = convertSize(87)
+    x=convertSize(1024 - 900), y=convertSize(691),
+    width=convertSize(455),
+    height=convertSize(87)
 )
-
-
 
 window.resizable(False, False)
 window.mainloop()

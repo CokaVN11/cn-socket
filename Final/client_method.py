@@ -1,3 +1,4 @@
+import datetime
 import socket
 import re
 import json
@@ -184,3 +185,10 @@ def LookUpRoom(client, hotel_name, arrival_date, depart_date):
     rooms = json.loads(data)
 
     return rooms
+
+
+def GetMoneyStaying(arrival: str, depart: str, price: int):
+    arrival = datetime.datetime.strptime(arrival, "%m/%d/%Y")
+    depart = datetime.datetime.strptime(depart, "%m/%d/%Y")
+    delta = depart-arrival
+    return delta.days * price
