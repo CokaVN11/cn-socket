@@ -17,7 +17,8 @@ OPTIONS = {
     "hotel_list": "3",
     "reservation": "4",
     "lookup": "5",
-    "booking": "6"
+    "booking": "6",
+    "cancel": "7"
 }
 
 
@@ -177,7 +178,7 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
         cx = sqlConn.cursor()
 
         cx.execute(
-            f"""select RESERVATION.TIMESTAMP, HOTEL.NAME, ROOM.TYPE, ROOM.PRICE, ROOM.VACANCIES, 
+            f"""select RESERVATION.TIMESTAMP, HOTEL.NAME, RESERVATION.HOTEL_ID, RESERVATION.ROOM_ID, ROOM.TYPE, ROOM.PRICE, ROOM.VACANCIES, 
             RESERVATION.QUALITY, RESERVATION.ARRIVAL, RESERVATION.DEPARTURE, RESERVATION.TOTAL 
             from RESERVATION, HOTEL, ROOM 
             where RESERVATION.USERNAME = '{username}' and 
@@ -279,29 +280,66 @@ def BookingRoom(conn, sqlConn: sqlite3.Connection):
         cx = sqlConn.cursor()
 
         username = recv_s(conn)
-        room_id = int(recv_s(conn))
-        quantity = int(recv_s(conn))
-        arrival = recv_s(conn)
-        departure = recv_s(conn)
-        total = int(recv_s(conn))
+        len_data = int(recv_s(conn))
+        data = conn.recv(len_data)
+
+        booking_list = json.loads(data)
+
         timestamp = datetime.datetime.now().replace(microsecond=0).timestamp()
-        arrival_ts = datetime.datetime.strptime(arrival, "%d/%m/%Y").timestamp()
-        departure_ts = datetime.datetime.strptime(departure, "%d/%m/%Y").timestamp()
-
-        cx.execute(f"select HOTEL_ID from ROOM where ID = {room_id}")
-        room = cx.fetchone()
-        # for i in room:
-        #     print(i)
-        if room is None:
-            send_s(conn, "Fail")
-            cx.close()
-            return
-
         insert_cmd = "insert into RESERVATION values (?, ?, ?, ?, ?, ?, ?, ?)"
-        cx.execute(insert_cmd, (timestamp, username, room['HOTEL_ID'], room_id, quantity, arrival_ts, departure_ts, total))
+        for booking in booking_list:
+            booking["Arrival"] = datetime.datetime.strptime(booking["Arrival"], "%d/%m/%Y").timestamp()
+            booking["Depart"] = datetime.datetime.strptime(booking["Depart"], "%d/%m/%Y").timestamp()
+
+            hotel_id = cx.execute(f"select HOTEL_ID from ROOM where ID = {booking['ID']}").fetchone()
+            if hotel_id is None:
+                send_s(conn, "Fail")
+                cx.close()
+                return
+            else:
+                hotel_id = hotel_id['HOTEL_ID']
+
+            cx.execute(insert_cmd, (timestamp, username, hotel_id, booking['ID'], booking['Quantity'],
+                                    booking['Arrival'], booking['Depart'], booking['Total']))
 
         sqlConn.commit()
         send_s(conn, "Finish")
+        cx.close()
+
+
+def CancelReservation(conn, sqlConn: sqlite3.Connection):
+    if conn:
+        username = recv_s(conn)
+        hotel_id = recv_s(conn)
+        room_id = recv_s(conn)
+        timestamp = recv_s(conn)
+        arrival_date = recv_s(conn)
+        depart_date = recv_s(conn)
+
+        timestamp = datetime.datetime.strptime(timestamp, "%d/%m/%Y %H:%M:%S").timestamp()
+        arrival_date = datetime.datetime.strptime(arrival_date, "%d/%m/%Y").timestamp()
+        depart_date = datetime.datetime.strptime(depart_date, "%d/%m/%Y").timestamp()
+
+        cx = sqlConn.cursor()
+
+        query = f"""select rowid, * from RESERVATION where TIMESTAMP = '{timestamp}'
+        and USERNAME = '{username}'
+        and ROOM_ID = {room_id}
+        and HOTEL_ID = {hotel_id}
+        and ARRIVAL = '{arrival_date}'
+        and DEPARTURE = '{depart_date}'"""
+
+        reservation = cx.execute(query).fetchone()
+
+        if reservation is None:
+            send_s(conn, "Fail")
+            cx.close()
+            return
+        cx.execute(f"delete from RESERVATION where rowid = {reservation['rowid']}")
+
+        send_s(conn, "Finish")
+        sqlConn.commit()
+
         cx.close()
 
 
@@ -324,7 +362,9 @@ def NavigateChoice(conn, addr, sqlConn: sqlite3.Connection, choice):
     elif choice == OPTIONS["booking"]:
         print(f"[{addr}] Booking room")
         BookingRoom(conn, sqlConn)
-
+    elif choice == OPTIONS["cancel"]:
+        print(f"[{addr}] Cancel reservation")
+        CancelReservation(conn, sqlConn)
 
 
 def handle_client(conn, addr, sqlConn: sqlite3.Connection):

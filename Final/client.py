@@ -95,12 +95,14 @@ class App(tk.Tk):
         self.frames["HotelListFrame"].tkraise()
 
     def show_reserve_list(self, container):
-        if self.frames["ReservationPageFrame"] is None:
-            self.frames["ReservationPageFrame"] = ReservationPageFrame(parent=container,
-                                                                       controller=self,
-                                                                       window=self,
-                                                                       reserve_list=self.reserve_list)
-            self.frames["ReservationPageFrame"].grid(row=0, column=0, sticky="nsew")
+        if self.frames["ReservationPageFrame"] is not None:
+            del self.frames["ReservationPageFrame"]
+        self.frames["ReservationPageFrame"] = ReservationPageFrame(parent=container,
+                                                                   controller=self,
+                                                                   window=self,
+                                                                   reserve_list=self.reserve_list)
+        self.frames["ReservationPageFrame"].grid(row=0, column=0, sticky="nsew")
+
         self.frames["ReservationPageFrame"].tkraise()
 
 
@@ -1051,7 +1053,8 @@ class CardCartFrame(tk.Frame):
 
     def __decrease_quantity(self, window):
         if self.room_quantity - 1 <= 0:
-            answer = messagebox.askokcancel("Info", "Do you want to remove this room out of list", icon=messagebox.WARNING)
+            answer = messagebox.askokcancel("Info", "Do you want to remove this room out of list",
+                                            icon=messagebox.WARNING)
             if answer:
                 print("Reserve: ", window.booking_list)
                 window.booking_list.pop(self.room_id)
@@ -1168,7 +1171,8 @@ class CartPageFrame(tk.Frame):
             self.cards[row].place(x=self.first_x, y=self.first_y + self.card_discrepancy * row,
                                   width=self.card_width, height=self.card_height)
             row += 1
-            self.sub_total += reserve['Quantity'] * GetMoneyStaying(arrival=reserve['Arrival'], depart=reserve['Depart'],
+            self.sub_total += reserve['Quantity'] * GetMoneyStaying(arrival=reserve['Arrival'],
+                                                                    depart=reserve['Depart'],
                                                                     price=reserve['Price'])
             # print(self.sub_total)
         # ==================== INFORMATION FRAME =====================#
@@ -1221,22 +1225,35 @@ class CartPageFrame(tk.Frame):
                               height=convert_size(self.window, 60))
         # ---Button Confirm---
         self.confirm_btn = tk.Button(master=self.info_frame, image=self.ImgConfirmBtn,
-                                     borderwidth=0, highlightthickness=0, command=lambda: btn_clicked(),
+                                     borderwidth=0, highlightthickness=0,
+                                     command=lambda: self.Confirm_Clicked(self.window),
                                      relief="flat")
         self.confirm_btn.place(x=convert_size(self.window, 1024 - 900), y=convert_size(self.window, 691),
                                width=convert_size(self.window, 455), height=convert_size(self.window, 87))
+
+    @staticmethod
+    def Confirm_Clicked(window):
+        if len(window.booking_list):
+            ok = Booking(client, window.username, window.booking_list)
+            if ok:
+                messagebox.showinfo("Booking", "Finish")
+                window.booking_list = []
+                window.show_frame("MenuFrame")
+            else:
+                messagebox.showinfo("Booking", "Fail")
 
     def Update_Total(self):
         self.sub_total = 0
 
         for reserve in self.reserve_list:
-            self.sub_total += reserve['Quantity'] * GetMoneyStaying(arrival=reserve['Arrival'], depart=reserve['Depart'], price=reserve['Price'])
+            self.sub_total += reserve['Quantity'] * GetMoneyStaying(arrival=reserve['Arrival'],
+                                                                    depart=reserve['Depart'], price=reserve['Price'])
 
         self.tax = self.sub_total // 10
 
         self.info_subtotal.configure(text=f"${self.sub_total}")
         self.info_tax.configure(text=f"${self.tax}")
-        self.info_total.configure(text=f"${self.sub_total+self.tax}")
+        self.info_total.configure(text=f"${self.sub_total + self.tax}")
 
     def Back(self):
         self.grid_forget()
@@ -1244,7 +1261,7 @@ class CartPageFrame(tk.Frame):
 
 
 class CardReservationFrame(tk.Frame):
-    def __init__(self, parent, controller, window, hotel_name, room_type, timestamp,
+    def __init__(self, parent, controller, window, row, hotel_name, hotel_id, room_id, room_type, timestamp,
                  arrival_date, departure_date, room_quantity, thumbnail, room_price):
         tk.Frame.__init__(self, parent)
 
@@ -1278,6 +1295,9 @@ class CardReservationFrame(tk.Frame):
         self.cancel_x = convert_size(window, 1301 - 122)
         self.cancel_y = convert_size(window, 353 - 157)
 
+        self.row = row
+        self.hotel_id = hotel_id
+        self.room_id = room_id
         self.arrival_date = arrival_date
         self.cancel_enable = CanCancel(timestamp)
         self.departure_date = departure_date
@@ -1334,9 +1354,23 @@ class CardReservationFrame(tk.Frame):
         # ---Cancel Button---
         if self.cancel_enable:
             self.cancel_btn = tk.Button(master=self, image=self.ImgCancelBtn, relief="flat",
-                                        bd=0, highlightthickness=0, command=lambda: btn_clicked())
+                                        bd=0, highlightthickness=0, command=lambda: self.Cancel_Clicked(window))
             self.cancel_btn.place(x=self.cancel_x, y=self.cancel_y,
                                   width=convert_size(window, 170), height=convert_size(window, 54))
+
+    def Cancel_Clicked(self, window):
+        ok = messagebox.askokcancel("Warning", "Are you sure to cancel?", icon=messagebox.WARNING)
+        if ok:
+            print("Canceling")
+            isCanceled = CancelReservation(client, window.username, self.hotel_id, self.room_id, self.timestamp,
+                                           self.arrival_date, self.departure_date)
+            if isCanceled:
+                messagebox.showinfo("Cancel status", "Finish")
+                self.controller.reserve_list.pop(self.row)
+                self.destroy()
+                window.show_reserve_list(self.controller.parent)
+            else:
+                messagebox.showinfo("Cancel status", "Fail")
 
 
 class ReservationPageFrame(tk.Frame):
@@ -1344,6 +1378,7 @@ class ReservationPageFrame(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
+        self.parent = parent
         self.reserve_list = reserve_list
         self.number_items = len(reserve_list)
         self.scroll_frame_height = convert_size(window, 157 + self.number_items * 298)
@@ -1404,6 +1439,7 @@ class ReservationPageFrame(tk.Frame):
         for reserve in self.reserve_list:
             self.cards[row] = CardReservationFrame(parent=self.container, controller=self,
                                                    window=window, hotel_name=reserve['NAME'],
+                                                   hotel_id=reserve['HOTEL_ID'], row=row, room_id=reserve['ROOM_ID'],
                                                    room_type=reserve['TYPE'], thumbnail="#thumbnail",
                                                    timestamp=reserve['TIMESTAMP'],
                                                    arrival_date=reserve['ARRIVAL'],

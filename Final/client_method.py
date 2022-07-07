@@ -16,7 +16,8 @@ OPTIONS = {
     "hotel_list": "3",
     "reservation": "4",
     "lookup": "5",
-    "booking": "6"
+    "booking": "6",
+    "cancel": "7"
 }
 
 
@@ -210,16 +211,31 @@ def CanCancel(time_to_check: str):
     return False
 
 
-def Booking(client, username, room_id, quantity, arrival, departure, total):
+def Booking(client, username, booking_list):
     send_s(client, OPTIONS['booking'])
     send_s(client, username)
-    send_s(client, str(room_id))
-    send_s(client, str(quantity))
-    send_s(client, arrival)  # send a str of %d/%m/%Y
-    send_s(client, departure)  # send a str of %d/%m/%Y
-    send_s(client, str(total))
+    for booking_room in booking_list:
+        booking_room['Total'] = booking_room['Quantity'] * GetMoneyStaying(booking_room['Arrival'],
+                                                                           booking_room['Depart'],
+                                                                           booking_room['Price'])
+    data = json.dumps([dict(ix) for ix in booking_list])
+    send_s(client, str(len(data)))
+    client.sendall(data.encode(FORMAT))
 
     # receive a message inform booking finish or fail
+    msg = recv_s(client)
+    return msg == "Finish"
+
+
+def CancelReservation(client, username, hotel_id, room_id, time_stamp, arrival_date, depart_date):
+    send_s(client, OPTIONS['cancel'])
+    send_s(client, username)
+    send_s(client, str(hotel_id))
+    send_s(client, str(room_id))
+    send_s(client, time_stamp)
+    send_s(client, arrival_date)
+    send_s(client, depart_date)
+
     msg = recv_s(client)
     return msg == "Finish"
 
