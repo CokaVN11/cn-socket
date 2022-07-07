@@ -157,18 +157,21 @@ def ShowBooked(client, username):
         print("empty")
         return
     reservations = json.loads(data)
-    first = True
-    for reserve in reservations:
-        if not first:
-            print("-"*10)
-        else:
-            first = False
-        print(f"Hotel: {reserve['NAME']}")
-        print(f"Room type: {reserve['TYPE']}")
-        print(f"Arrival day: {reserve['ARRIVAL']}")
-        print(f"Departure day: {reserve['DEPARTURE']}")
-        print(f"Quantity: {reserve['QUALITY']}")
-        print(f"Total price: {reserve['TOTAL']}")
+    # first = True
+    # for reserve in reservations:
+    #     if not first:
+    #         print("-"*10)
+    #     else:
+    #         first = False
+    #     print(f"Time: {reserve['TIMESTAMP']}")
+    #     print(f"Hotel: {reserve['NAME']}")
+    #     print(f"Room type: {reserve['TYPE']}")
+    #     print(f"Arrival day: {reserve['ARRIVAL']}")
+    #     print(f"Departure day: {reserve['DEPARTURE']}")
+    #     print(f"Quantity: {reserve['QUALITY']}")
+    #     print(f"Price: {reserve['PRICE']}")
+    #     print(f"Total price: {reserve['TOTAL']}")
+    return reservations
 
 
 def LookUpRoom(client, hotel_name, arrival_date, depart_date):
@@ -192,3 +195,12 @@ def GetMoneyStaying(arrival: str, depart: str, price: int):
     depart = datetime.datetime.strptime(depart, "%m/%d/%Y")
     delta = depart-arrival
     return delta.days * price
+
+
+def CanCancel(time_to_check: str):
+    time_to_check = datetime.datetime.strptime(time_to_check, "%d/%m/%Y %H:%M:%S")
+    time_now = datetime.datetime.now()
+    delta = time_now - time_to_check
+    if delta.days <= 1:
+        return True
+    return False

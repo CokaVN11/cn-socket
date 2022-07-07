@@ -352,48 +352,68 @@ try:
     # hotel = ("H1", "Hotel 1", "Normal", 10, 10, 100)
     # cx.execute("INSERT INTO HOTEL VALUES (?, ?, ?, ?, ?, ?)",  hotel)
 
-    str_today = datetime.datetime.now().replace(microsecond=0)
-    timestamp = datetime.datetime.timestamp(str_today)
-    # str_fromtimestamp = datetime.datetime.fromtimestamp(timestamp)
-    # print(str_today)
-    # print(timestamp)
-
-    # insert_cmd = "INSERT INTO HOTEL (NAME, DESC, AVAILABLE) VALUES (?,?,?)"
-    # for name in hotel_names:
-    #     hotel = (name, "Choose me", 1)
-    #     cx.execute(insert_cmd, hotel)
-
-    # insert_room(sqlConn)
-    # print("a")
-    # combine_room(sqlConn)
-
-    # rows = cx.fetchall()
-    # for row in rows:
-    #     print(row)
+    # str_today = datetime.datetime.now().replace(microsecond=0)
+    # timestamp = datetime.datetime.timestamp(str_today)
+    # # str_fromtimestamp = datetime.datetime.fromtimestamp(timestamp)
+    # # print(str_today)
+    # # print(timestamp)
+    #
+    # # insert_cmd = "INSERT INTO HOTEL (NAME, DESC, AVAILABLE) VALUES (?,?,?)"
+    # # for name in hotel_names:
+    # #     hotel = (name, "Choose me", 1)
+    # #     cx.execute(insert_cmd, hotel)
+    #
+    # # insert_room(sqlConn)
+    # # print("a")
+    # # combine_room(sqlConn)
+    #
+    # # rows = cx.fetchall()
+    # # for row in rows:
+    # #     print(row)
     # insert_cmd = "insert into RESERVATION values (?, ?, ?, ?, ?, ?, ?, ?)"
-    arrival = "4/07/2022"
-    arrival_ts = datetime.datetime.strptime(arrival, "%d/%m/%Y").timestamp()
-    departure = "11/07/2022"
-    departure_ts = datetime.datetime.strptime(departure, "%d/%m/%Y").timestamp()
+    # arrival = "15/07/2022"
+    # arrival_ts = datetime.datetime.strptime(arrival, "%d/%m/%Y").timestamp()
+    # departure = "16/07/2022"
+    # departure_ts = datetime.datetime.strptime(departure, "%d/%m/%Y").timestamp()
     # username = "kn110"
-    # hotel_id = "1"
-    # room_id = "2"
+    # hotel_id = "2"
+    # room_id = "3"
     # quality = 2
-    # room = cx.execute("select * from ROOM where HOTEL_ID = 1 and ID = 2").fetchone()
-    # #
-    # # update_cmd = f"""update ROOM
-    # # set VACANCIES = {room['VACANCIES'] - quality}
-    # # where HOTEL_ID = 1 and ID = 1
-    # # """
-    # # cx.execute(update_cmd)
-    # #
+    # room = cx.execute(f"select * from ROOM where HOTEL_ID = {hotel_id} and ID = {room_id}").fetchone()
+    # # #
+    # # # update_cmd = f"""update ROOM
+    # # # set VACANCIES = {room['VACANCIES'] - quality}
+    # # # where HOTEL_ID = 1 and ID = 1
+    # # # """
+    # # # cx.execute(update_cmd)
+    # # #
     # total = quality * room['PRICE']
     # reservation = (timestamp, username, hotel_id, room_id, quality, arrival_ts, departure_ts, total)
     # print(reservation)
     # cx.execute(insert_cmd, reservation)
     # cx.execute("""update ROOM set VACANCIES = 2 where ID = 1""")
-    print(arrival_ts, departure_ts)
-    cx.execute(f"""update RESERVATION set DEPARTURE = {str(departure_ts)} where TOTAL = 200""")
+    # print(arrival_ts, departure_ts)
+    # cx.execute(f"""update RESERVATION set DEPARTURE = {str(departure_ts)} where TOTAL = 200""")
+
+    rooms = cx.execute("select * from ROOM").fetchall()
+    
+    for room in rooms:
+        update_bed = f"update ROOM set BED = (?) where ID = {room['ID']}"
+        update_area = f"update ROOM set AREA = (?) where ID = {room['ID']}"
+        update_guest = f"update ROOM set GUEST = (?) where ID = {room['ID']}"
+        print(update_bed)
+        if room['TYPE'] =="Single":
+            cx.execute(update_bed, (1,))
+            cx.execute(update_area, (68,))
+            cx.execute(update_guest, (1,))
+        elif room['TYPE'] == "Double":
+            cx.execute(update_bed, (2,))
+            cx.execute(update_area, (76,))
+            cx.execute(update_guest, (2,))
+        else:
+            cx.execute(update_bed, (1,))
+            cx.execute(update_area, (90,))
+            cx.execute(update_guest, (1,))
 
     sqlConn.commit()
     cx.close()

@@ -123,19 +123,19 @@ titleReservation = Label(
     anchor="center"
 )
 
-
-ImgTemplate = convertImage("template.png", 1378, 272)
-heheTemplate = Button(
-    containerFrame,
-    image = ImgTemplate,
-    borderwidth = 0,
-    highlightthickness = 0,
-    command = btn_clicked,
-    relief = "flat")
-heheTemplate.place(
-    x = convertSize(122), y = convertSize(157),
-    width = convertSize(1378),
-    height = convertSize(272))
+#
+# ImgTemplate = convertImage("template.png", 1378, 272)
+# heheTemplate = Button(
+#     containerFrame,
+#     image = ImgTemplate,
+#     borderwidth = 0,
+#     highlightthickness = 0,
+#     command = btn_clicked,
+#     relief = "flat")
+# heheTemplate.place(
+#     x = convertSize(122), y = convertSize(157),
+#     width = convertSize(1378),
+#     height = convertSize(272))
 
 # # ==================== CARD Constants ====================#
 cardWidth = convertSize(1378)

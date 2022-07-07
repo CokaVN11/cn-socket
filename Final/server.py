@@ -174,7 +174,8 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
         cx = sqlConn.cursor()
 
         cx.execute(
-            f"""select HOTEL.NAME, ROOM.TYPE, RESERVATION.QUALITY, RESERVATION.ARRIVAL, RESERVATION.DEPARTURE, RESERVATION.TOTAL 
+            f"""select RESERVATION.TIMESTAMP, HOTEL.NAME, ROOM.TYPE, ROOM.PRICE, ROOM.VACANCIES, 
+            RESERVATION.QUALITY, RESERVATION.ARRIVAL, RESERVATION.DEPARTURE, RESERVATION.TOTAL 
             from RESERVATION, HOTEL, ROOM 
             where RESERVATION.USERNAME = '{username}' and 
             RESERVATION.HOTEL_ID = HOTEL.ID and
@@ -188,6 +189,9 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
         if len(rows) != 0:
             for row in rows:
                 # print(type(row['ARRIVAL']))
+                row["TIMESTAMP"] = datetime.datetime.fromtimestamp(
+                    float(row["TIMESTAMP"])
+                ).strftime("%d/%m/%Y %H:%M:%S")
                 row["ARRIVAL"] = datetime.datetime.fromtimestamp(
                     float(row["ARRIVAL"])
                 ).strftime("%d/%m/%Y")
@@ -195,7 +199,7 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
                     float(row["DEPARTURE"])
                 ).strftime("%d/%m/%Y")
                 # print(type(row['ARRIVAL']))
-                # print(row)
+                print(row)
             data = json.dumps([dict(ix) for ix in rows])
             send_s(conn, str(len(data)))
             conn.sendall(data.encode(FORMAT))
@@ -233,7 +237,7 @@ def SendRoomList(conn, addr, sqlConn: sqlite3.Connection):
         depart_date = datetime.datetime.strptime(depart_date, "%d/%m/%Y")
 
         # print(hotel_name, type(arrival_date), depart_date)
-        cx.execute(f"""select ROOM.ID, ROOM.TYPE, ROOM.DESC, ROOM.VACANCIES, ROOM.PRICE
+        cx.execute(f"""select ROOM.ID, ROOM.TYPE, ROOM.DESC, ROOM.VACANCIES, ROOM.PRICE, ROOM.BED, ROOM.AREA, ROOM.GUEST
                       from HOTEL, ROOM
                       where HOTEL.NAME = '{hotel_name}' and HOTEL.ID = ROOM.HOTEL_ID""")
         rooms = [dict(row) for row in cx]
@@ -260,7 +264,7 @@ def SendRoomList(conn, addr, sqlConn: sqlite3.Connection):
 
             print(rooms)
             print(reservations)
-            data = json.dumps([dict(ix) for ix in rooms if ix['VACANCIES'] > 0])
+            data = json.dumps([dict(ix) for ix in rooms])
             send_s(conn, str(len(data)))
             conn.sendall(data.encode(FORMAT))
         cx.close()
