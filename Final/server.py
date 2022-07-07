@@ -5,7 +5,7 @@ import json
 import datetime
 
 IP = socket.gethostbyname(socket.gethostname())
-PORT = 27276
+PORT = 27278
 ADDR = (IP, PORT)
 BUFSIZ = 1024
 FORMAT = "utf-8"
@@ -16,7 +16,8 @@ OPTIONS = {
     "login": "2",
     "hotel_list": "3",
     "reservation": "4",
-    "lookup": "5"
+    "lookup": "5",
+    "booking": "6"
 }
 
 
@@ -111,7 +112,8 @@ def Login(conn, addr, sqlConn: sqlite3.Connection):
             print(f"[SERVER] Received from {addr}")
             print(f"[{addr}] username = {username}, password = {password}")
         cx = sqlConn.cursor()
-        query = "SELECT * FROM " + "USER" + " WHERE username LIKE '" + username + "'"
+        # query = "SELECT * FROM " + "USER" + " WHERE username LIKE '" + username + "'"
+        query = f"select * from USER where username like '{username}'"
         cx.execute(query)
         rows = cx.fetchall()
         if len(rows) == 0:
@@ -119,6 +121,7 @@ def Login(conn, addr, sqlConn: sqlite3.Connection):
         for row in rows:
             if row[1] == password:
                 send_s(conn, "Oke")
+                send_s(conn, str(row[2]))
             else:
                 send_s(conn, "Not oke")
         cx.close()
@@ -270,6 +273,38 @@ def SendRoomList(conn, addr, sqlConn: sqlite3.Connection):
         cx.close()
 
 
+def BookingRoom(conn, sqlConn: sqlite3.Connection):
+    if conn:
+        sqlConn.row_factory = sqlite3.Row
+        cx = sqlConn.cursor()
+
+        username = recv_s(conn)
+        room_id = int(recv_s(conn))
+        quantity = int(recv_s(conn))
+        arrival = recv_s(conn)
+        departure = recv_s(conn)
+        total = int(recv_s(conn))
+        timestamp = datetime.datetime.now().replace(microsecond=0).timestamp()
+        arrival_ts = datetime.datetime.strptime(arrival, "%d/%m/%Y").timestamp()
+        departure_ts = datetime.datetime.strptime(departure, "%d/%m/%Y").timestamp()
+
+        cx.execute(f"select HOTEL_ID from ROOM where ID = {room_id}")
+        room = cx.fetchone()
+        # for i in room:
+        #     print(i)
+        if room is None:
+            send_s(conn, "Fail")
+            cx.close()
+            return
+
+        insert_cmd = "insert into RESERVATION values (?, ?, ?, ?, ?, ?, ?, ?)"
+        cx.execute(insert_cmd, (timestamp, username, room['HOTEL_ID'], room_id, quantity, arrival_ts, departure_ts, total))
+
+        sqlConn.commit()
+        send_s(conn, "Finish")
+        cx.close()
+
+
 def NavigateChoice(conn, addr, sqlConn: sqlite3.Connection, choice):
     if choice == OPTIONS["register"]:
         print(f"[{addr}] Registering")
@@ -286,8 +321,10 @@ def NavigateChoice(conn, addr, sqlConn: sqlite3.Connection, choice):
     elif choice == OPTIONS["lookup"]:
         # print(f"[{addr}] Booking guide")
         SendRoomList(conn, addr, sqlConn)
-    elif choice == "6":
-        print(f"[{addr}] Log-outing")
+    elif choice == OPTIONS["booking"]:
+        print(f"[{addr}] Booking room")
+        BookingRoom(conn, sqlConn)
+
 
 
 def handle_client(conn, addr, sqlConn: sqlite3.Connection):

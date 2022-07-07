@@ -4,7 +4,7 @@ import re
 import json
 
 IP = socket.gethostbyname(socket.gethostname())
-PORT = 27276
+PORT = 27278
 ADDR = (IP, PORT)
 BUFSIZ = 1024
 FORMAT = "utf-8"
@@ -15,7 +15,8 @@ OPTIONS = {
     "login": "2",
     "hotel_list": "3",
     "reservation": "4",
-    "lookup": "5"
+    "lookup": "5",
+    "booking": "6"
 }
 
 
@@ -99,7 +100,6 @@ def Register(client, username, password, bank):
 def Login(client, username, password):
     send_s(client, OPTIONS["login"])
     valid = True
-    # cur_valid = True
     pop_up = ""
     valid_username = None
 
@@ -112,6 +112,7 @@ def Login(client, username, password):
             pop_up += "\n"
         pop_up += tmp
 
+    bank = ""
     if valid:
         send_s(client, username)
         send_s(client, password)
@@ -120,12 +121,13 @@ def Login(client, username, password):
         if msg == "Oke":
             print("[CLIENT] Login successfully")
             valid_username = username
+            bank = recv_s(client)
             pop_up = "Successfully"
         else:
             print("[CLIENT] You are a dump shit")
             pop_up = "Fail"
 
-    return valid, pop_up, valid_username
+    return valid, pop_up, valid_username, bank
 
 
 def ShowHotelList(client):
@@ -175,6 +177,8 @@ def ShowBooked(client, username):
 
 
 def LookUpRoom(client, hotel_name, arrival_date, depart_date):
+    if arrival_date is None and depart_date is None:
+        return None
     send_s(client, OPTIONS['lookup'])
     send_s(client, hotel_name)
     send_s(client, arrival_date)
@@ -191,9 +195,9 @@ def LookUpRoom(client, hotel_name, arrival_date, depart_date):
 
 
 def GetMoneyStaying(arrival: str, depart: str, price: int):
-    arrival = datetime.datetime.strptime(arrival, "%m/%d/%Y")
-    depart = datetime.datetime.strptime(depart, "%m/%d/%Y")
-    delta = depart-arrival
+    arrival = datetime.datetime.strptime(arrival, "%d/%m/%Y")
+    depart = datetime.datetime.strptime(depart, "%d/%m/%Y")
+    delta = depart - arrival
     return delta.days * price
 
 
@@ -204,3 +208,22 @@ def CanCancel(time_to_check: str):
     if delta.days <= 1:
         return True
     return False
+
+
+def Booking(client, username, room_id, quantity, arrival, departure, total):
+    send_s(client, OPTIONS['booking'])
+    send_s(client, username)
+    send_s(client, str(room_id))
+    send_s(client, str(quantity))
+    send_s(client, arrival)  # send a str of %d/%m/%Y
+    send_s(client, departure)  # send a str of %d/%m/%Y
+    send_s(client, str(total))
+
+    # receive a message inform booking finish or fail
+    msg = recv_s(client)
+    return msg == "Finish"
+
+
+def GetStrNow():
+    time_now = datetime.datetime.now().replace(microsecond=0).strftime("%d/%m/%Y %H:%M:%S")
+    return time_now

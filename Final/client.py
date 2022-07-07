@@ -43,8 +43,10 @@ class App(tk.Tk):
 
         # Current user
         self.username = ""
+        self.bank = ""
         self.hotel_list = {}
         self.reserve_list = {}
+        self.booking_list = []
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.geometry(self.resolution)
@@ -74,6 +76,8 @@ class App(tk.Tk):
 
     def on_closing(self):
         print(QUIT_MSG)
+        for room in self.booking_list:
+            print(room)
         send_s(client, QUIT_MSG)
         client.close()
         self.quit()
@@ -196,7 +200,7 @@ class LoginFrame(tk.Frame):
         username_input = self.UserEntry.get()
         password_input = self.PswdEntry.get()
         print(username_input, password_input)
-        valid, pop_up, username = Login(client, username_input, password_input)
+        valid, pop_up, username, bank = Login(client, username_input, password_input)
         print(pop_up)
         if not valid:
             messagebox.showwarning("Invalid input", pop_up)
@@ -204,6 +208,7 @@ class LoginFrame(tk.Frame):
             messagebox.showinfo("Login status", pop_up)
             if username:
                 self.controller.username = username
+                self.controller.bank = bank
                 self.controller.show_frame("MenuFrame")
 
 
@@ -424,8 +429,10 @@ class MenuFrame(tk.Frame):
 
     def LogoutClicked(self):
         self.controller.username = ""
+        self.controller.bank = ""
         self.controller.hotel_list = {}
         self.controller.reserve_list = {}
+        self.controller.booking_list = {}
         self.controller.show_frame("LoginFrame")
 
 
@@ -500,7 +507,9 @@ class CardHotelFrame(tk.Frame):
         self.popup_screen = DatePopup(self, self.window)
         self.wait_window(self.popup_screen.top)
         room_list = LookUpRoom(client, self.card_name, self.arrival_value(), self.depart_value())
-        self.controller.show_room_frame(room_list, self.card_name, self.hotel_page)
+        if room_list is not None:
+            self.controller.show_room_frame(room_list, self.card_name, self.hotel_page, self.arrival_value(),
+                                            self.depart_value())
 
     def arrival_value(self):
         return self.popup_screen.arrival_date
@@ -623,15 +632,19 @@ class HotelListFrame(tk.Frame):
             frame = self.frames[page_number]
             frame.tkraise()
 
-    def show_room_frame(self, room_list, hotel_name, previous_page):
+    def show_room_frame(self, room_list, hotel_name, previous_page, arrival_date, depart_date):
         self.room_frame = RoomPageFrame(parent=self.container, controller=self, window=self.controller,
-                                        hotel_name=hotel_name, room_list=room_list, previous_frame=previous_page)
+                                        hotel_name=hotel_name, room_list=room_list, previous_frame=previous_page,
+                                        arrival_date=arrival_date, depart_date=depart_date)
         self.room_frame.grid(row=0, column=0, sticky="nsew")
         self.room_frame.tkraise()
 
-    def show_cart_frame(self, reserve_list, previous_page):
+    def show_cart_frame(self, reserve_list):
+        if len(reserve_list) <= 0:
+            messagebox.showinfo("Info", "You are not booking any room")
+            return
         self.cart_frame = CartPageFrame(parent=self.container, controller=self.room_frame, window=self.controller,
-                                        number_items=6)
+                                        reserve_list=reserve_list)
         self.cart_frame.grid(row=0, column=0, sticky="nsew")
         self.cart_frame.tkraise()
 
@@ -726,44 +739,45 @@ class DatePopup:
 
 
 class CardRoomFrame(tk.Frame):
-    def __init__(self, parent, controller, row, card_name, card_description, room_vacancies, card_price,
+    def __init__(self, parent, controller, window, room_id, card_name, card_description, room_vacancies, card_price,
                  card_thumbnail_path, card_bed, card_area, card_guest):
         tk.Frame.__init__(self, parent)
+        self.controller = controller
         # ---Card constants---
-        self.card_width = convert_size(controller, 1354)
-        self.card_height = convert_size(controller, 324)
+        self.card_width = convert_size(window, 1354)
+        self.card_height = convert_size(window, 324)
 
-        self.canvas_width = convert_size(controller, 1354)
-        self.canvas_height = convert_size(controller, 324)
+        self.canvas_width = convert_size(window, 1354)
+        self.canvas_height = convert_size(window, 324)
 
-        self.thumbnail_x = convert_size(controller, 1354 / 2)
-        self.thumbnail_y = convert_size(controller, 324 / 2)
+        self.thumbnail_x = convert_size(window, 1354 / 2)
+        self.thumbnail_y = convert_size(window, 324 / 2)
 
-        self.name_x = convert_size(controller, 619 - 123)
-        self.name_y = convert_size(controller, 186 - 155 - 26)
+        self.name_x = convert_size(window, 619 - 123)
+        self.name_y = convert_size(window, 186 - 155 - 26)
 
-        self.desc_x = convert_size(controller, 619 - 123)
-        self.desc_y = convert_size(controller, 253 - 155 - 4)
+        self.desc_x = convert_size(window, 619 - 123)
+        self.desc_y = convert_size(window, 253 - 155 - 4)
 
-        self.price_x = convert_size(controller, 1268 - 123 + 186)
-        self.price_y = convert_size(controller, 186 - 155 + 20)
+        self.price_x = convert_size(window, 1268 - 123 + 186)
+        self.price_y = convert_size(window, 186 - 155 + 20)
 
-        self.tag_available_x = convert_size(controller, (401 - 123) + (161 / 2))
-        self.tag_available_y = convert_size(controller, (389 - 155) + (42 / 2))
-        self.tag_full_x = convert_size(controller, (471 - 123) + (91 / 2))
-        self.tag_full_y = convert_size(controller, (389 - 155) + (42 / 2))
+        self.tag_available_x = convert_size(window, (401 - 123) + (161 / 2))
+        self.tag_available_y = convert_size(window, (389 - 155) + (42 / 2))
+        self.tag_full_x = convert_size(window, (471 - 123) + (91 / 2))
+        self.tag_full_y = convert_size(window, (389 - 155) + (42 / 2))
 
-        self.bed_x = convert_size(controller, 670 - 123 - 4)
-        self.bed_y = convert_size(controller, 408 - 155 - 12)
-        self.area_x = convert_size(controller, 807 - 123 - 4)
-        self.area_y = convert_size(controller, 408 - 155 - 12)
-        self.guest_x = convert_size(controller, 938 - 123 - 4)
-        self.guest_y = convert_size(controller, 408 - 155 - 12)
+        self.bed_x = convert_size(window, 670 - 123 - 4)
+        self.bed_y = convert_size(window, 408 - 155 - 12)
+        self.area_x = convert_size(window, 807 - 123 - 4)
+        self.area_y = convert_size(window, 408 - 155 - 12)
+        self.guest_x = convert_size(window, 938 - 123 - 4)
+        self.guest_y = convert_size(window, 408 - 155 - 12)
 
-        self.btn_x = convert_size(controller, 1216 - 123)
-        self.btn_y = convert_size(controller, 380 - 155)
+        self.btn_x = convert_size(window, 1216 - 123)
+        self.btn_y = convert_size(window, 380 - 155)
 
-        self.row = row
+        self.room_id = room_id
         self.card_name = card_name
         self.description = card_description
         self.status = True
@@ -775,19 +789,19 @@ class CardRoomFrame(tk.Frame):
         self.area = card_area
         self.guest = card_guest
         # ------
-        self.__create_widgets(controller)
+        self.__create_widgets(window)
 
-    def __create_widgets(self, controller):
+    def __create_widgets(self, window):
         self.canvas = tk.Canvas(master=self, bg="#ffffff", bd=0, highlightthickness=0, relief="ridge",
                                 height=self.canvas_height, width=self.canvas_width)
         self.canvas.place(x=0, y=0)
 
         # ---Image declaration---
-        self.ImgThumbnail = convert_image(controller, "./assets/LK_room1_single.png", 1354, 324)
-        self.ImgTagAvailable = convert_image(controller, "./assets/LK_Available.png", 161, 42)
-        self.ImgTagFull = convert_image(controller, "./assets/LK_Full.png", 91, 42)
-        self.ImgReserveBtn = convert_image(controller, "./assets/LK_ReserveBtn.png", 234, 68)
-        self.ImgReserveDis = convert_image(controller, "./assets/LK_ReserveDisabled.png", 234, 68)
+        self.ImgThumbnail = convert_image(window, "./assets/LK_room1_single.png", 1354, 324)
+        self.ImgTagAvailable = convert_image(window, "./assets/LK_Available.png", 161, 42)
+        self.ImgTagFull = convert_image(window, "./assets/LK_Full.png", 91, 42)
+        self.ImgReserveBtn = convert_image(window, "./assets/LK_ReserveBtn.png", 234, 68)
+        self.ImgReserveDis = convert_image(window, "./assets/LK_ReserveDisabled.png", 234, 68)
 
         # ---Card thumbnail---
         self.card_thumbnail = self.canvas.create_image(self.thumbnail_x,
@@ -800,55 +814,70 @@ class CardRoomFrame(tk.Frame):
             self.tag_full = self.canvas.create_image(self.tag_full_x, self.tag_full_y, image=self.ImgTagFull)
         # ---Card name---
         self.name_label = tk.Label(master=self, text=self.card_name, foreground="#47423D", background="#ffffff",
-                                   font=("Noto Sans Bold", convert_size(controller, 40)))
+                                   font=("Noto Sans Bold", convert_size(window, 40)))
         self.name_label.place(x=self.name_x, y=self.name_y)
         # ---Card description---
         self.card_desc = tk.Label(master=self, text=self.description,
                                   foreground="#7D8693", background="#ffffff", justify=tk.LEFT,
-                                  wraplength=convert_size(controller, 600),
-                                  font=("Hind Guntur Medium", convert_size(controller, 18)))
+                                  wraplength=convert_size(window, 600),
+                                  font=("Hind Guntur Medium", convert_size(window, 18)))
         self.card_desc.place(x=self.desc_x, y=self.desc_y)
         # ---Card price---
         self.card_price = tk.Label(master=self, anchor="e", text=self.price,
                                    foreground="#35bdda", background="white",
-                                   justify=tk.RIGHT, font=("Noto Sans Bold", convert_size(controller, 50)),
-                                   width=convert_size(controller, 8))
-        self.card_price.place(anchor="e", x=self.price_x, y=self.price_y, height=convert_size(controller, 80))
+                                   justify=tk.RIGHT, font=("Noto Sans Bold", convert_size(window, 50)),
+                                   width=convert_size(window, 8))
+        self.card_price.place(anchor="e", x=self.price_x, y=self.price_y, height=convert_size(window, 80))
         # ---Card bed---
         self.card_bed = tk.Label(master=self, text=f"{self.bed} Bed",
                                  foreground="#8f8f8f", background="#ffffff",
-                                 justify=tk.LEFT, font=("Noto Sans Regular", convert_size(controller, 18)))
+                                 justify=tk.LEFT, font=("Noto Sans Regular", convert_size(window, 18)))
         self.card_bed.place(x=self.bed_x, y=self.bed_y)
         # ---Card area---
         self.card_area = tk.Label(master=self, text=f"{self.area} m2",
                                   foreground="#8f8f8f", background="#ffffff",
-                                  justify=tk.LEFT, font=("Noto Sans Regular", convert_size(controller, 18)))
+                                  justify=tk.LEFT, font=("Noto Sans Regular", convert_size(window, 18)))
         self.card_area.place(x=self.area_x, y=self.area_y)
         # ---Card guest---
         self.card_guest = tk.Label(master=self, text=f"{self.guest} Guest",
                                    foreground="#8f8f8f", background="#ffffff",
-                                   justify=tk.LEFT, font=("Noto Sans Regular", convert_size(controller, 18)))
+                                   justify=tk.LEFT, font=("Noto Sans Regular", convert_size(window, 18)))
         self.card_guest.place(x=self.guest_x, y=self.guest_y)
         # ---Reserve Button---
         if self.status:
             self.reserve_btn = tk.Button(master=self, image=self.ImgReserveBtn, borderwidth=0,
-                                         highlightthickness=0, command=lambda: btn_clicked(), relief="flat")
+                                         highlightthickness=0, relief="flat",
+                                         command=lambda: self.__Reserve_clicked(window))
             self.reserve_btn.place(x=self.btn_x, y=self.btn_y,
-                                   width=convert_size(controller, 234), height=convert_size(controller, 68))
+                                   width=convert_size(window, 234), height=convert_size(window, 68))
         else:
             self.reserve_btn = tk.Button(master=self, image=self.ImgReserveDis, borderwidth=0,
                                          highlightthickness=0, command=lambda: btn_clicked(), relief="flat")
             self.reserve_btn.place(x=self.btn_x, y=self.btn_y,
-                                   width=convert_size(controller, 234), height=convert_size(controller, 68))
+                                   width=convert_size(window, 234), height=convert_size(window, 68))
+
+    def __Reserve_clicked(self, window):
+        window.booking_list.append({
+            "ID": self.room_id,
+            "Hotel Name": self.controller.hotel_name,
+            "Room type": self.card_name,
+            "Arrival": self.controller.arrival,
+            "Depart": self.controller.depart,
+            "Price": self.price,
+            "Quantity": 1,
+            "Thumbnail": "#Thumbnail"
+        })
 
 
 class RoomPageFrame(tk.Frame):
-    def __init__(self, parent, controller, window, hotel_name, room_list, previous_frame):
+    def __init__(self, parent, controller, window, hotel_name, room_list, previous_frame, arrival_date, depart_date):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         self.previous_frame = previous_frame
         self.room_list = room_list
         self.hotel_name = hotel_name
+        self.arrival = arrival_date
+        self.depart = depart_date
         self.number_items = len(room_list)
         self.scroll_frame_height = convert_size(window, 155 + self.number_items * 367)
         # ---Card constants---
@@ -859,9 +888,9 @@ class RoomPageFrame(tk.Frame):
         self.first_y = convert_size(window, 155)
         self.card_discrepancy = convert_size(window, 522 - 155)
 
-        self.__create_widgets(parent, window)
+        self.__create_widgets(window)
 
-    def __create_widgets(self, parent, window):
+    def __create_widgets(self, window):
         self.canvas = tk.Canvas(master=self, bg="#ffffff", bd=0,
                                 height=window.frameHeight, width=window.frameWidth,
                                 highlightthickness=0, relief="ridge")
@@ -896,33 +925,39 @@ class RoomPageFrame(tk.Frame):
         # ---Cart button---
         self.ImgCartBtn = convert_image(window, "./assets/LK_Cart.png", 109, 109)
         self.cart_btn = tk.Button(master=self.container, image=self.ImgCartBtn, borderwidth=0, relief="flat",
-                                  highlightthickness=0, command=lambda: self.controller.show_cart_frame([], 1))
+                                  highlightthickness=0,
+                                  command=lambda: self.controller.show_cart_frame(window.booking_list))
         self.cart_btn.place(x=convert_size(window, 1462), y=convert_size(window, 30),
                             width=convert_size(window, 109), height=convert_size(window, 109))
 
         # ---Hotel name title---
-        self.hotel_name = tk.Label(master=self.container, text=f"{self.hotel_name}",
-                                   foreground="#47423D", background="#ffffff",
-                                   justify=tk.CENTER, font=("Noto Sans SemiBold", convert_size(window, 50)))
-        self.hotel_name.place(x=window.frameWidth/2, y=convert_size(window, 84), anchor="center")
+        self.hotel_name_label = tk.Label(master=self.container, text=f"{self.hotel_name}",
+                                         foreground="#47423D", background="#ffffff",
+                                         justify=tk.CENTER, font=("Noto Sans SemiBold", convert_size(window, 50)))
+        self.hotel_name_label.place(x=window.frameWidth / 2, y=convert_size(window, 84), anchor="center")
 
         self.cards = {}
 
         row = 0
         # ex_desc = ("", "", "")
         for room in self.room_list:
-            # if room['TYPE'] == "Single":
-            #     ex_desc = ("1 Bed", "68 m2", "1 Guest")
-            # elif room['TYPE'] == "Double":
-            #     ex_desc = ("2 Bed", "76 m2", "2 Guest")
-            # elif room['TYPE'] == "V.I.P":
-            #     ex_desc = ("1 Bed", "90 m2", "1 Guest")
-            self.cards[row] = CardRoomFrame(self.container, window, row, room['TYPE'], room['DESC'], room['VACANCIES'],
+            self.cards[row] = CardRoomFrame(self.container, self, window, room['ID'], room['TYPE'], room['DESC'],
+                                            room['VACANCIES'],
                                             room['PRICE'], "#Thumbnail",
                                             room['BED'], room['AREA'], room['GUEST'])
             self.cards[row].place(x=self.first_x, y=self.first_y + self.card_discrepancy * row,
                                   width=self.card_width, height=self.card_height)
             row += 1
+
+    # This method will be call from the room card
+    def ReserveClicked(self, window, room_id, room_price):
+        total = GetMoneyStaying(self.arrival, self.depart, room_price)
+        isOk = Booking(client=client, username=window.username, room_id=room_id,
+                       quantity=1, arrival=self.arrival, departure=self.depart, total=total)
+        if isOk:
+            messagebox.showinfo("Booking", "Finish")
+        else:
+            messagebox.showinfo("Booking", "Fail")
 
     def Back(self):
         self.grid_forget()
@@ -1026,7 +1061,7 @@ class CardCartFrame(tk.Frame):
 class CartPageFrame(tk.Frame):
     """Container for info frame & item frame of CART PAGE"""
 
-    def __init__(self, parent, controller, window, number_items):
+    def __init__(self, parent, controller, window, reserve_list):
         self.controller = controller
         self.window = window
         tk.Frame.__init__(self, parent)
@@ -1037,7 +1072,8 @@ class CartPageFrame(tk.Frame):
         self.info_frame_width = convert_size(window, 700)
         self.info_frame_height = convert_size(window, 900)
 
-        self.number_items = number_items
+        self.number_items = len(reserve_list)
+        self.reserve_list = reserve_list
 
         # ---Card constants---
         self.first_x = convert_size(window, 31)
@@ -1097,28 +1133,34 @@ class CartPageFrame(tk.Frame):
         self.back_btn.place(x=convert_size(self.window, 43), y=convert_size(self.window, 30),
                             width=convert_size(self.window, 137), height=convert_size(self.window, 44))
 
-        reserve = CardCartFrame(parent=self.container_frame, controller=self, window=self.window,
-                                row=1, hotel_name="Lake Place", room_type="Single Room",
-                                arrival_date="04/07/2022", departure_date="07/07/2022",
-                                room_quantity=2, thumbnail="#thumbnailPath", room_price=200)
-        reserve.place(x=self.first_x,
-                      y=self.first_y + self.card_discrepancy * 0,
-                      width=self.card_width, height=self.card_height)
-
+        self.cards = {}
+        row = 0
+        self.sub_total = 0
+        for reserve in self.reserve_list:
+            self.cards[row] = CardCartFrame(parent=self.container_frame, controller=self, window=self.window,
+                                            row=row, hotel_name=reserve['Hotel Name'],
+                                            room_type=reserve['Room type'], arrival_date=reserve['Arrival'],
+                                            departure_date=reserve['Depart'], thumbnail=reserve['Thumbnail'],
+                                            room_price=reserve['Price'], room_quantity=reserve['Quantity'])
+            self.cards[row].place(x=self.first_x, y=self.first_y + self.card_discrepancy*row,
+                                  width=self.card_width, height=self.card_height)
+            row += 1
+            self.sub_total += GetMoneyStaying(arrival=reserve['Arrival'], depart=reserve['Depart'], price=reserve['Price'])
+            # print(self.sub_total)
         # ==================== INFORMATION FRAME =====================#
         self.info_bg = self.info_canvas.create_image(convert_size(self.window, 950 - 900 + 603 / 2),
                                                      convert_size(self.window, 134 + 516 / 2),
                                                      image=self.ImgInfoBg)
         # ---Username---
         self.info_username = tk.Label(master=self.info_frame, anchor="e",
-                                      text="devilboiz", foreground="#7D8693", background="#ffffff",
+                                      text=self.window.username, foreground="#7D8693", background="#ffffff",
                                       justify=tk.RIGHT, font=("Hind Guntur SemiBold", convert_size(self.window, 22)),
                                       width=convert_size(self.window, 24))
         self.info_username.place(anchor="e", x=convert_size(self.window, 1272 - 900 + 270),
                                  y=convert_size(self.window, 213 + 20), height=convert_size(self.window, 40))
         # ---Bank account---
         self.info_bank = tk.Label(master=self.info_frame, anchor="e",
-                                  text="1234567890", foreground="#7D8693", background="#ffffff",
+                                  text=self.window.bank, foreground="#7D8693", background="#ffffff",
                                   justify=tk.RIGHT, font=("Hind Guntur SemiBold", convert_size(self.window, 22)),
                                   width=convert_size(self.window, 24))
         self.info_bank.place(anchor="e",
@@ -1127,7 +1169,7 @@ class CartPageFrame(tk.Frame):
                              height=convert_size(self.window, 40))
         # ---Subtotal---
         self.info_subtotal = tk.Label(master=self.info_frame, anchor="e",
-                                      text="$800", foreground="#7D8693", background="#ffffff",
+                                      text=f"${self.sub_total}", foreground="#7D8693", background="#ffffff",
                                       justify=tk.RIGHT, font=("Hind Guntur SemiBold", convert_size(self.window, 22)),
                                       width=convert_size(self.window, 24))
         self.info_subtotal.place(anchor="e",
@@ -1135,8 +1177,9 @@ class CartPageFrame(tk.Frame):
                                  y=convert_size(self.window, 213 + 20 + (463 - 213)),
                                  height=convert_size(self.window, 40))
         # ---Tax---
+        self.tax = self.sub_total // 10
         self.info_tax = tk.Label(master=self.info_frame, anchor="e",
-                                 text="$80", foreground="#7D8693", background="#ffffff",
+                                 text=f"${self.tax}", foreground="#7D8693", background="#ffffff",
                                  justify=tk.RIGHT, font=("Hind Guntur SemiBold", convert_size(self.window, 22)),
                                  width=convert_size(self.window, 24))
         self.info_tax.place(anchor="e",
@@ -1145,7 +1188,7 @@ class CartPageFrame(tk.Frame):
                             height=convert_size(self.window, 40))
         # ---Total---
         self.info_total = tk.Label(master=self.info_frame, anchor="e",
-                                   text="$880", foreground="#35BDDA", background="#ffffff",
+                                   text=f"${self.sub_total + self.tax}", foreground="#35BDDA", background="#ffffff",
                                    justify=tk.RIGHT,
                                    font=("Hind Guntur SemiBold", convert_size(self.window, 36)))
         self.info_total.place(anchor="e",
