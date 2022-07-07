@@ -643,7 +643,7 @@ class HotelListFrame(tk.Frame):
         if len(reserve_list) <= 0:
             messagebox.showinfo("Info", "You are not booking any room")
             return
-        self.cart_frame = CartPageFrame(parent=self.container, controller=self.room_frame, window=self.controller,
+        self.cart_frame = CartPageFrame(parent=self.container, controller=self, window=self.controller,
                                         reserve_list=reserve_list)
         self.cart_frame.grid(row=0, column=0, sticky="nsew")
         self.cart_frame.tkraise()
@@ -740,7 +740,7 @@ class DatePopup:
 
 class CardRoomFrame(tk.Frame):
     def __init__(self, parent, controller, window, room_id, card_name, card_description, room_vacancies, card_price,
-                 card_thumbnail_path, card_bed, card_area, card_guest):
+                 card_thumbnail_path, card_bed, card_area, card_guest, max_room):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         # ---Card constants---
@@ -788,6 +788,7 @@ class CardRoomFrame(tk.Frame):
         self.bed = card_bed
         self.area = card_area
         self.guest = card_guest
+        self.max_room = max_room
         # ------
         self.__create_widgets(window)
 
@@ -865,7 +866,8 @@ class CardRoomFrame(tk.Frame):
             "Depart": self.controller.depart,
             "Price": self.price,
             "Quantity": 1,
-            "Thumbnail": "#Thumbnail"
+            "Thumbnail": "#Thumbnail",
+            "Max": self.max_room
         })
 
 
@@ -944,20 +946,10 @@ class RoomPageFrame(tk.Frame):
             self.cards[row] = CardRoomFrame(self.container, self, window, room['ID'], room['TYPE'], room['DESC'],
                                             room['VACANCIES'],
                                             room['PRICE'], "#Thumbnail",
-                                            room['BED'], room['AREA'], room['GUEST'])
+                                            room['BED'], room['AREA'], room['GUEST'], room['VACANCIES'])
             self.cards[row].place(x=self.first_x, y=self.first_y + self.card_discrepancy * row,
                                   width=self.card_width, height=self.card_height)
             row += 1
-
-    # This method will be call from the room card
-    def ReserveClicked(self, window, room_id, room_price):
-        total = GetMoneyStaying(self.arrival, self.depart, room_price)
-        isOk = Booking(client=client, username=window.username, room_id=room_id,
-                       quantity=1, arrival=self.arrival, departure=self.depart, total=total)
-        if isOk:
-            messagebox.showinfo("Booking", "Finish")
-        else:
-            messagebox.showinfo("Booking", "Fail")
 
     def Back(self):
         self.grid_forget()
@@ -965,12 +957,12 @@ class RoomPageFrame(tk.Frame):
 
 
 class CardCartFrame(tk.Frame):
-    def __init__(self, parent, controller, window, row, hotel_name, room_type,
+    def __init__(self, parent, controller, window, room_id, hotel_name, room_type,
                  arrival_date, departure_date, room_quantity, thumbnail, room_price):
         tk.Frame.__init__(self, parent)
 
         self.controller = controller
-        self.row = row
+        self.room_id = room_id
         self.hotel_name = hotel_name
         self.room_type = room_type
         self.arrival_date = arrival_date
@@ -1034,34 +1026,65 @@ class CardCartFrame(tk.Frame):
         self.card_date.place(x=self.date_x, y=self.date_y)
 
         # ---Card price---
-        money = GetMoneyStaying(self.arrival_date, self.departure_date, self.room_price)
-        self.card_price = tk.Label(master=self, anchor="e", text=f"${self.room_quantity * money}",
+        money = self.room_quantity * GetMoneyStaying(self.arrival_date, self.departure_date, self.room_price)
+        self.card_price = tk.Label(master=self, anchor="e", text=f"${money}",
                                    foreground="#35BDDA", background="#ffffff", justify=tk.RIGHT,
                                    font=("Noto Sans Bold", convert_size(window, 30)), width=convert_size(window, 8))
         self.card_price.place(anchor="e", x=self.price_x, y=self.price_y, height=convert_size(window, 80))
 
         # ---Quantity label---
-        self.canvas.create_text(self.quantity_x, self.quantity_y, text=f"{self.room_quantity}",
-                                fill="#000000", font=("Noto Sans Regular", convert_size(window, 16)))
+        self.quantity = self.canvas.create_text(self.quantity_x, self.quantity_y, text=f"{self.room_quantity}",
+                                                fill="#000000", font=("Noto Sans Regular", convert_size(window, 16)))
 
         # ---Button '-'---
         self.decrease_btn = tk.Button(master=self, image=self.ImgDecreaseBtn,
                                       borderwidth=0, highlightthickness=0, relief="flat",
-                                      command=lambda: btn_clicked())
+                                      command=lambda: self.__decrease_quantity(window))
         self.decrease_btn.place(x=self.decrease_btn_x, y=self.decrease_btn_y,
                                 width=convert_size(window, 28), height=convert_size(window, 28))
         # ---Button '+'---
         self.increase_btn = tk.Button(master=self, image=self.ImgIncreaseBtn,
                                       borderwidth=0, highlightthickness=0, relief="flat",
-                                      command=lambda: btn_clicked())
+                                      command=lambda: self.__increase_quantity())
         self.increase_btn.place(x=self.increase_btn_x, y=self.increase_btn_y,
                                 width=convert_size(window, 28), height=convert_size(window, 28))
+
+    def __decrease_quantity(self, window):
+        if self.room_quantity - 1 <= 0:
+            answer = messagebox.askokcancel("Info", "Do you want to remove this room out of list", icon=messagebox.WARNING)
+            if answer:
+                print("Reserve: ", window.booking_list)
+                window.booking_list.pop(self.room_id)
+                print(window.booking_list)
+                self.controller.Back()
+                self.controller.controller.show_cart_frame(window.booking_list)
+                del self.controller
+            return
+        self.controller.reserve_list[self.room_id]['Quantity'] -= 1
+        self.room_quantity -= 1
+        self.canvas.itemconfig(self.quantity, text=f"{self.room_quantity}")
+        money = self.room_quantity * GetMoneyStaying(self.arrival_date, self.departure_date, self.room_price)
+        self.card_price.configure(text=f"${money}")
+        self.controller.Update_Total()
+
+    def __increase_quantity(self):
+        if self.room_quantity + 1 > self.controller.reserve_list[self.room_id]['Max']:
+            messagebox.showinfo("Info", "You have booked all of room.")
+            return
+        self.controller.reserve_list[self.room_id]['Quantity'] += 1
+        self.room_quantity += 1
+        self.canvas.itemconfig(self.quantity, text=f"{self.room_quantity}")
+        money = self.room_quantity * GetMoneyStaying(self.arrival_date, self.departure_date, self.room_price)
+        self.card_price.configure(text=f"${money}")
+        self.controller.Update_Total()
 
 
 class CartPageFrame(tk.Frame):
     """Container for info frame & item frame of CART PAGE"""
 
     def __init__(self, parent, controller, window, reserve_list):
+        self.tax = 0
+        self.sub_total = 0
         self.controller = controller
         self.window = window
         tk.Frame.__init__(self, parent)
@@ -1138,14 +1161,15 @@ class CartPageFrame(tk.Frame):
         self.sub_total = 0
         for reserve in self.reserve_list:
             self.cards[row] = CardCartFrame(parent=self.container_frame, controller=self, window=self.window,
-                                            row=row, hotel_name=reserve['Hotel Name'],
+                                            room_id=row, hotel_name=reserve['Hotel Name'],
                                             room_type=reserve['Room type'], arrival_date=reserve['Arrival'],
                                             departure_date=reserve['Depart'], thumbnail=reserve['Thumbnail'],
                                             room_price=reserve['Price'], room_quantity=reserve['Quantity'])
-            self.cards[row].place(x=self.first_x, y=self.first_y + self.card_discrepancy*row,
+            self.cards[row].place(x=self.first_x, y=self.first_y + self.card_discrepancy * row,
                                   width=self.card_width, height=self.card_height)
             row += 1
-            self.sub_total += GetMoneyStaying(arrival=reserve['Arrival'], depart=reserve['Depart'], price=reserve['Price'])
+            self.sub_total += reserve['Quantity'] * GetMoneyStaying(arrival=reserve['Arrival'], depart=reserve['Depart'],
+                                                                    price=reserve['Price'])
             # print(self.sub_total)
         # ==================== INFORMATION FRAME =====================#
         self.info_bg = self.info_canvas.create_image(convert_size(self.window, 950 - 900 + 603 / 2),
@@ -1201,6 +1225,18 @@ class CartPageFrame(tk.Frame):
                                      relief="flat")
         self.confirm_btn.place(x=convert_size(self.window, 1024 - 900), y=convert_size(self.window, 691),
                                width=convert_size(self.window, 455), height=convert_size(self.window, 87))
+
+    def Update_Total(self):
+        self.sub_total = 0
+
+        for reserve in self.reserve_list:
+            self.sub_total += reserve['Quantity'] * GetMoneyStaying(arrival=reserve['Arrival'], depart=reserve['Depart'], price=reserve['Price'])
+
+        self.tax = self.sub_total // 10
+
+        self.info_subtotal.configure(text=f"${self.sub_total}")
+        self.info_tax.configure(text=f"${self.tax}")
+        self.info_total.configure(text=f"${self.sub_total+self.tax}")
 
     def Back(self):
         self.grid_forget()
