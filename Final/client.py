@@ -933,12 +933,12 @@ class RoomPageFrame(tk.Frame):
         self.back_btn.place(x=convert_size(window, 41), y=convert_size(window, 44),
                             width=convert_size(window, 227), height=convert_size(window, 55))
         # ---Cart button---
-        self.ImgCartBtn = convert_image(window, "./assets/LK_Cart.png", 109, 109)
+        self.ImgCartBtn = convert_image(window, "./assets/LK_Cart.png", 88, 88)
         self.cart_btn = tk.Button(master=self.container, image=self.ImgCartBtn, borderwidth=0, relief="flat",
                                   highlightthickness=0,
                                   command=lambda: self.controller.show_cart_frame(window.booking_list))
-        self.cart_btn.place(x=convert_size(window, 1462), y=convert_size(window, 30),
-                            width=convert_size(window, 109), height=convert_size(window, 109))
+        self.cart_btn.place(x=convert_size(window, 1484), y=convert_size(window, 786),
+                            width=convert_size(window, 88), height=convert_size(window, 88))
 
         # ---Hotel name title---
         self.hotel_name_label = tk.Label(master=self.container, text=f"{self.hotel_name}",
