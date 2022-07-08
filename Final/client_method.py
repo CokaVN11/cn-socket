@@ -29,7 +29,7 @@ def send_s(conn: socket.socket(), msg: str):
 
 def recv_s(conn: socket.socket()):
     if conn:
-        msg = conn.recv(BUFSIZ).decode(FORMAT)
+        msg = conn.recv(BUFSIZ).decode(FORMAT).strip()
         conn.sendall(msg.encode(FORMAT))
         return msg
     else:
@@ -138,6 +138,11 @@ def ShowHotelList(client):
     if data == b'empty':
         return
     hotels = json.loads(data)
+
+    for hotel in hotels:
+        len_data = int(recv_s(client))
+        img = client.recv(len_data)
+        hotel['IMG'] = img
     # first = True
     # for hotel in hotels:
     #     if not first:
@@ -160,20 +165,10 @@ def ShowBooked(client, username):
         print("empty")
         return
     reservations = json.loads(data)
-    # first = True
-    # for reserve in reservations:
-    #     if not first:
-    #         print("-"*10)
-    #     else:
-    #         first = False
-    #     print(f"Time: {reserve['TIMESTAMP']}")
-    #     print(f"Hotel: {reserve['NAME']}")
-    #     print(f"Room type: {reserve['TYPE']}")
-    #     print(f"Arrival day: {reserve['ARRIVAL']}")
-    #     print(f"Departure day: {reserve['DEPARTURE']}")
-    #     print(f"Quantity: {reserve['QUALITY']}")
-    #     print(f"Price: {reserve['PRICE']}")
-    #     print(f"Total price: {reserve['TOTAL']}")
+
+    for reserve in reservations:
+        len_data = int(recv_s(client))
+        reserve['IMG'] = client.recv(len_data)
     return reservations
 
 
@@ -191,6 +186,10 @@ def LookUpRoom(client, hotel_name, arrival_date, depart_date):
         print("empty")
         return []
     rooms = json.loads(data)
+
+    for room in rooms:
+        len_data = int(recv_s(client))
+        room['IMG'] = client.recv(len_data)
 
     return rooms
 
@@ -214,11 +213,23 @@ def CanCancel(time_to_check: str):
 def Booking(client, username, booking_list):
     send_s(client, OPTIONS['booking'])
     send_s(client, username)
+    rows = []
+
     for booking_room in booking_list:
         booking_room['Total'] = booking_room['Quantity'] * GetMoneyStaying(booking_room['Arrival'],
                                                                            booking_room['Depart'],
                                                                            booking_room['Price'])
-    data = json.dumps([dict(ix) for ix in booking_list])
+        rows.append({"ID": booking_room['ID'],
+                     "Hotel Name": booking_room['Hotel Name'],
+                     "Room type": booking_room['Room type'],
+                     "Arrival": booking_room['Arrival'],
+                     "Depart": booking_room['Depart'],
+                     "Price": booking_room['Price'],
+                     "Quantity": booking_room['Quantity'],
+                     "Max": booking_room['Max'],
+                     "Total": booking_room['Total']})
+
+    data = json.dumps(rows)
     send_s(client, str(len(data)))
     client.sendall(data.encode(FORMAT))
 

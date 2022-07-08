@@ -152,7 +152,14 @@ def SendHotelList(conn, addr, sqlConn: sqlite3.Connection):
         sqlConn.row_factory = sqlite3.Row
         cx = sqlConn.cursor()
 
-        rows = cx.execute("select * from HOTEL").fetchall()
+        cx.execute("select * from HOTEL")
+
+        rows = []
+        images = []
+
+        for row in cx:
+            rows.append(dict(ID=row['ID'], NAME=row['NAME'], DESC=row['DESC'], AVAILABLE=row['AVAILABLE']))
+            images.append(row['IMG'])
 
         # print(type(rows))
 
@@ -161,6 +168,10 @@ def SendHotelList(conn, addr, sqlConn: sqlite3.Connection):
             print(f"Length of data sent: {len(data)}")
             send_s(conn, str(len(data)))
             conn.sendall(data.encode(FORMAT))
+            for img in images:
+                len_data = len(img)
+                send_s(conn, str(len_data))
+                conn.sendall(img)
             # conn.sendall(data)
         else:
             data = "empty"
@@ -178,7 +189,7 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
         cx = sqlConn.cursor()
 
         cx.execute(
-            f"""select RESERVATION.TIMESTAMP, HOTEL.NAME, RESERVATION.HOTEL_ID, RESERVATION.ROOM_ID, ROOM.TYPE, ROOM.PRICE, ROOM.VACANCIES, 
+            f"""select RESERVATION.TIMESTAMP, HOTEL.NAME, RESERVATION.HOTEL_ID, RESERVATION.ROOM_ID, ROOM.TYPE, ROOM.PRICE, ROOM.VACANCIES, ROOM.IMG,
             RESERVATION.QUALITY, RESERVATION.ARRIVAL, RESERVATION.DEPARTURE, RESERVATION.TOTAL 
             from RESERVATION, HOTEL, ROOM 
             where RESERVATION.USERNAME = '{username}' and 
@@ -186,7 +197,14 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
             RESERVATION.ROOM_ID = ROOM.ID"""
         )
 
-        rows = [dict(row) for row in cx]
+        rows = []
+        images = []
+
+        for row in cx:
+            rows.append(dict(TIMESTAMP=row['TIMESTAMP'], NAME=row['NAME'], HOTEL_ID=row['HOTEL_ID'], ROOM_ID=row['ROOM_ID'],
+                             TYPE=row['TYPE'], PRICE=row['PRICE'], VACANCIES=row['VACANCIES'],
+                             QUANTITY=row['QUALITY'], ARRIVAL=row['ARRIVAL'], DEPARTURE=row['DEPARTURE'], TOTAL=row['TOTAL']))
+            images.append(row['IMG'])
 
         # print(rows)
 
@@ -203,10 +221,15 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
                     float(row["DEPARTURE"])
                 ).strftime("%d/%m/%Y")
                 # print(type(row['ARRIVAL']))
-                print(row)
+                # print(row)
             data = json.dumps([dict(ix) for ix in rows])
             send_s(conn, str(len(data)))
             conn.sendall(data.encode(FORMAT))
+
+            for img in images:
+                len_data = len(img)
+                send_s(conn, str(len_data))
+                conn.sendall(img)
 
         else:
             data = "empty"
@@ -241,10 +264,16 @@ def SendRoomList(conn, addr, sqlConn: sqlite3.Connection):
         depart_date = datetime.datetime.strptime(depart_date, "%d/%m/%Y")
 
         # print(hotel_name, type(arrival_date), depart_date)
-        cx.execute(f"""select ROOM.ID, ROOM.TYPE, ROOM.DESC, ROOM.VACANCIES, ROOM.PRICE, ROOM.BED, ROOM.AREA, ROOM.GUEST
+        cx.execute(f"""select ROOM.ID, ROOM.TYPE, ROOM.DESC, ROOM.VACANCIES, ROOM.PRICE, ROOM.BED, ROOM.AREA, ROOM.GUEST, ROOM.IMG
                       from HOTEL, ROOM
                       where HOTEL.NAME = '{hotel_name}' and HOTEL.ID = ROOM.HOTEL_ID""")
-        rooms = [dict(row) for row in cx]
+        rooms = []
+        images = []
+
+        for row in cx:
+            rooms.append(dict(ID=row['ID'], TYPE=row['TYPE'], DESC=row['DESC'], VACANCIES=row['VACANCIES'],
+                         PRICE=row['PRICE'], BED=row['BED'], AREA=row['AREA'], GUEST=row['GUEST']))
+            images.append(row['IMG'])
 
         cx.execute("""select RESERVATION.ROOM_ID, RESERVATION.QUALITY, RESERVATION.ARRIVAL, RESERVATION.DEPARTURE
                       from RESERVATION, HOTEL
@@ -266,11 +295,14 @@ def SendRoomList(conn, addr, sqlConn: sqlite3.Connection):
                     if not isNotInOtherDatetime(reserve['ARRIVAL'], reserve['DEPARTURE'], arrival_date, depart_date):
                         room['VACANCIES'] -= reserve['QUALITY']
 
-            print(rooms)
-            print(reservations)
+            # print(rooms)
+            # print(reservations)
             data = json.dumps([dict(ix) for ix in rooms])
             send_s(conn, str(len(data)))
             conn.sendall(data.encode(FORMAT))
+            for img in images:
+                send_s(conn, str(len(img)))
+                conn.sendall(img)
         cx.close()
 
 
@@ -282,7 +314,6 @@ def BookingRoom(conn, sqlConn: sqlite3.Connection):
         username = recv_s(conn)
         len_data = int(recv_s(conn))
         data = conn.recv(len_data)
-
         booking_list = json.loads(data)
 
         timestamp = datetime.datetime.now().replace(microsecond=0).timestamp()

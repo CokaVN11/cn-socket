@@ -1,3 +1,4 @@
+import io
 import tkinter as tk
 from tkinter import messagebox
 from math import floor, ceil
@@ -12,6 +13,15 @@ def convert_size(window, original_size):
 
 def convert_image(window, path, original_width, original_height):
     original_image = Image.open(path)
+    resized_image = original_image.resize(
+        (convert_size(window, original_width), convert_size(window, original_height))
+    )
+    converted_image = ImageTk.PhotoImage(resized_image)
+    return converted_image
+
+
+def convert_image_from_byte(window, data, original_width, original_height):
+    original_image = Image.open(io.BytesIO(data))
     resized_image = original_image.resize(
         (convert_size(window, original_width), convert_size(window, original_height))
     )
@@ -440,7 +450,7 @@ class MenuFrame(tk.Frame):
 
 class CardHotelFrame(tk.Frame):
     def __init__(self, parent, controller, window, column, card_name, card_description, card_status,
-                 card_thumbnail_path, hotel_page):
+                 card_thumbnail, hotel_page):
         tk.Frame.__init__(self, parent)
         self.popup_screen = None
         self.window = window
@@ -468,7 +478,7 @@ class CardHotelFrame(tk.Frame):
         self.card_name = card_name
         self.card_description = card_description
         self.card_status = card_status
-        self.thumbnail_path = card_thumbnail_path
+        self.thumbnail = card_thumbnail
         # ------
         self.__create_widgets(window)
 
@@ -478,15 +488,17 @@ class CardHotelFrame(tk.Frame):
                                 bd=0, highlightthickness=0, relief="ridge")
         self.canvas.place(x=0, y=0)
         # ---Declare image---
-        self.ImgThumbnail = convert_image(window, self.thumbnail_path, 423, 564)
+        self.ImgThumbnail = convert_image_from_byte(window, self.thumbnail, 423, 261)
+        self.ImgThumbnailTemplate = convert_image(window, "./assets/LOH_template.png", 423, 564)
         self.ImgAvailable = convert_image(window, "./assets/LOH_Available.png", 161, 42)
         self.ImgFull = convert_image(window, "./assets/LOH_Full.png", 91, 42)
         self.ImgLookupBtn = convert_image(window, "./assets/LOH_LookupBtn.png", 197, 65)
         self.ImgDisLookupBtn = convert_image(window, "./assets/LOH_LookupDisabled.png", 197, 65)
         # ------
-        self.card_thumbnail = self.canvas.create_image(self.thumbnail_x,
-                                                       self.thumbnail_y,
-                                                       image=self.ImgThumbnail)
+        self.card_thumbnail = self.canvas.create_image(self.thumbnail_x, ceil(261 / 2) - 15, image=self.ImgThumbnail)
+        self.card_thumbnail_template = self.canvas.create_image(self.thumbnail_x,
+                                                                self.thumbnail_y,
+                                                                image=self.ImgThumbnailTemplate)
 
         # Button Lookup
         self.lookupBtn = tk.Button(master=self, image=self.ImgLookupBtn, borderwidth=0,
@@ -567,7 +579,7 @@ class HotelPageFrame(tk.Frame):
         for i in self.hotels:
             self.cards[i['ID']] = CardHotelFrame(self, controller, window, i['ID'], i['NAME'],
                                                  f"{i['DESC']} {self.page_number}",
-                                                 int(i['AVAILABLE']), "./assets/LOH_thumbnail1.png", self.page_number)
+                                                 int(i['AVAILABLE']), i['IMG'], self.page_number)
             self.cards[i['ID']].place(x=self.first_card_x + self.card_discrepancy * column, y=self.first_card_y,
                                       width=self.card_width, height=self.card_height)
             column += 1
@@ -588,11 +600,11 @@ class HotelPageFrame(tk.Frame):
                                   borderwidth=0, highlightthickness=0,
                                   command=lambda: controller.go_to_page(self.page_number - 1), relief="flat")
 
-        self.page_label = tk.Label(master=self, 
-                                   text=f"{self.page_number}", 
+        self.page_label = tk.Label(master=self,
+                                   text=f"{self.page_number}",
                                    foreground="#35bdda",
                                    background="white",
-                                   image=self.ImgPageBtn, 
+                                   image=self.ImgPageBtn,
                                    compound=tk.CENTER,
                                    font=("Noto Sans SemiBold", convert_size(window, 24)))
         self.page_label.place(x=convert_size(window, 762), y=convert_size(window, 780),
@@ -625,12 +637,12 @@ class HotelListFrame(tk.Frame):
         self.container.pack(side="top", fill="both", expand=1)
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
-        
+
         self.frames = {}
 
         for F in range(self.begin_page, self.end_page + 1):
             mini_hotel_list = self.hotel_list[F * 3 - 3:F * 3]
-            print(mini_hotel_list)
+            # print(mini_hotel_list)
             frame = HotelPageFrame(parent=self.container, window=controller, controller=self, page_number=F,
                                    hotel_list=mini_hotel_list)
             self.frames[F] = frame
@@ -757,7 +769,7 @@ class DatePopup:
 
 class CardRoomFrame(tk.Frame):
     def __init__(self, parent, controller, window, room_id, card_name, card_description, room_vacancies, card_price,
-                 card_thumbnail_path, card_bed, card_area, card_guest, max_room):
+                 card_thumbnail, card_bed, card_area, card_guest, max_room):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         # ---Card constants---
@@ -801,7 +813,7 @@ class CardRoomFrame(tk.Frame):
         if room_vacancies <= 0:
             self.status = False
         self.price = card_price
-        self.thumbnail_path = card_thumbnail_path
+        self.thumbnail = card_thumbnail
         self.bed = card_bed
         self.area = card_area
         self.guest = card_guest
@@ -815,15 +827,17 @@ class CardRoomFrame(tk.Frame):
         self.canvas.place(x=0, y=0)
 
         # ---Image declaration---
-        self.ImgThumbnail = convert_image(window, "./assets/LK_room1_single.png", 1354, 324)
+        self.ImgThumbnail = convert_image_from_byte(window, self.thumbnail, 425, 263)
+        self.ImgThumbnailTemplate = convert_image(window, "./assets/LK_template.png", 1354, 324)
         self.ImgTagAvailable = convert_image(window, "./assets/LK_Available.png", 161, 42)
         self.ImgTagFull = convert_image(window, "./assets/LK_Full.png", 91, 42)
         self.ImgReserveBtn = convert_image(window, "./assets/LK_ReserveBtn.png", 234, 68)
         self.ImgReserveDis = convert_image(window, "./assets/LK_ReserveDisabled.png", 234, 68)
 
         # ---Card thumbnail---
-        self.card_thumbnail = self.canvas.create_image(self.thumbnail_x,
-                                                       self.thumbnail_y, image=self.ImgThumbnail)
+        self.card_thumbnail = self.canvas.create_image(485 / 2 - 10, 324 / 2 - 5, image=self.ImgThumbnail)
+        self.card_thumbnail_template = self.canvas.create_image(self.thumbnail_x,
+                                                                self.thumbnail_y, image=self.ImgThumbnailTemplate)
         # ---Card status---
         if self.status:
             self.tag_available = self.canvas.create_image(self.tag_available_x, self.tag_available_y,
@@ -883,7 +897,7 @@ class CardRoomFrame(tk.Frame):
             "Depart": self.controller.depart,
             "Price": self.price,
             "Quantity": 1,
-            "Thumbnail": "#Thumbnail",
+            "Thumbnail": self.thumbnail,
             "Max": self.max_room
         })
 
@@ -962,7 +976,7 @@ class RoomPageFrame(tk.Frame):
         for room in self.room_list:
             self.cards[row] = CardRoomFrame(self.container, self, window, room['ID'], room['TYPE'], room['DESC'],
                                             room['VACANCIES'],
-                                            room['PRICE'], "#Thumbnail",
+                                            room['PRICE'], room['IMG'],
                                             room['BED'], room['AREA'], room['GUEST'], room['VACANCIES'])
             self.cards[row].place(x=self.first_x, y=self.first_y + self.card_discrepancy * row,
                                   width=self.card_width, height=self.card_height)
@@ -1013,7 +1027,8 @@ class CardCartFrame(tk.Frame):
         self.increase_btn_y = convert_size(window, 245 - 102)
 
         # ---Image declare---
-        self.ImgThumbnail = convert_image(window, "./assets/Cart_thumbnail.png", 819, 200)
+        self.ImgThumbnail = convert_image_from_byte(window, self.thumbnail, 265, 165)
+        self.ImgThumbnailTemplate = convert_image(window, "./assets/Cart_template.png", 819, 200)
         self.ImgIncreaseBtn = convert_image(window, "./assets/Cart_increaseBtn.png", 28, 28)
         self.ImgDecreaseBtn = convert_image(window, "./assets/Cart_decreaseBtn.png", 28, 28)
 
@@ -1026,9 +1041,10 @@ class CardCartFrame(tk.Frame):
         self.canvas.place(x=0, y=0)
 
         # ---Card thumbnail---
-        self.card_thumbnail = self.canvas.create_image(self.thumbnail_x,
-                                                       self.thumbnail_y,
-                                                       image=self.ImgThumbnail)
+        self.card_thumbnail = self.canvas.create_image(297 / 2, 100, image=self.ImgThumbnail)
+        self.card_thumbnail_template = self.canvas.create_image(self.thumbnail_x,
+                                                                self.thumbnail_y,
+                                                                image=self.ImgThumbnailTemplate)
 
         # ---Card name---
         self.card_name = tk.Label(master=self, text=f"{self.hotel_name} ({self.room_type})",
@@ -1071,9 +1087,9 @@ class CardCartFrame(tk.Frame):
             answer = messagebox.askokcancel("Info", "Do you want to remove this room out of list",
                                             icon=messagebox.WARNING)
             if answer:
-                print("Reserve: ", window.booking_list)
+                # print("Reserve: ", window.booking_list)
                 window.booking_list.pop(self.room_id)
-                print(window.booking_list)
+                # print(window.booking_list)
                 self.controller.Back()
                 self.controller.controller.show_cart_frame(window.booking_list)
                 del self.controller
@@ -1246,13 +1262,17 @@ class CartPageFrame(tk.Frame):
         self.confirm_btn.place(x=convert_size(self.window, 1024 - 900), y=convert_size(self.window, 691),
                                width=convert_size(self.window, 455), height=convert_size(self.window, 87))
 
-    @staticmethod
-    def Confirm_Clicked(window):
+    def Confirm_Clicked(self, window):
         if len(window.booking_list):
             ok = Booking(client, window.username, window.booking_list)
             if ok:
                 messagebox.showinfo("Booking", "Finish")
                 window.booking_list = []
+                self.destroy()
+                self.controller.room_frame.destroy()
+                del self.controller.room_frame
+                self.controller.tkraise()
+                del self
                 window.show_frame("MenuFrame")
             else:
                 messagebox.showinfo("Booking", "Fail")
@@ -1320,10 +1340,11 @@ class CardReservationFrame(tk.Frame):
         self.room_price = room_price
         self.room_quantity = room_quantity
         self.room_type = room_type
-        self.thumbnail_path = thumbnail
+        self.card_thumbnail = thumbnail
         self.timestamp = timestamp
         # ==================== IMAGE ====================#
-        self.ImgThumbnail = convert_image(window, "./assets/Res_background.png", 1378, 272)
+        self.ImgThumbnail = convert_image_from_byte(window, self.card_thumbnail, 355, 221)
+        self.ImgThumbnailTemplate = convert_image(window, "./assets/ResThumbnail_template.png", 1378, 272)
         self.ImgCancelBtn = convert_image(window, "./assets/Res_cancelBtn.png", 170, 54)
 
         self.__create_widgets(window)
@@ -1335,7 +1356,9 @@ class CardReservationFrame(tk.Frame):
         self.canvas.place(x=0, y=0)
 
         # ---Thumbnail---
-        self.thumbnail = self.canvas.create_image(self.thumbnail_x, self.thumbnail_y, image=self.ImgThumbnail)
+        self.thumbnail = self.canvas.create_image(204, 136, image=self.ImgThumbnail)
+        self.thumbnail_template = self.canvas.create_image(self.thumbnail_x, self.thumbnail_y,
+                                                           image=self.ImgThumbnailTemplate)
 
         # ---Name---
         self.name = tk.Label(master=self, text=f"{self.hotel_name} ({self.room_type})",
@@ -1455,11 +1478,11 @@ class ReservationPageFrame(tk.Frame):
             self.cards[row] = CardReservationFrame(parent=self.container, controller=self,
                                                    window=window, hotel_name=reserve['NAME'],
                                                    hotel_id=reserve['HOTEL_ID'], row=row, room_id=reserve['ROOM_ID'],
-                                                   room_type=reserve['TYPE'], thumbnail="#thumbnail",
+                                                   room_type=reserve['TYPE'], thumbnail=reserve['IMG'],
                                                    timestamp=reserve['TIMESTAMP'],
                                                    arrival_date=reserve['ARRIVAL'],
                                                    departure_date=reserve['DEPARTURE'],
-                                                   room_quantity=reserve['QUALITY'],
+                                                   room_quantity=reserve['QUANTITY'],
                                                    room_price=reserve['TOTAL'])
             self.cards[row].place(x=self.first_x, y=self.first_y + self.card_discrepancy * row,
                                   width=self.card_width, height=self.card_height)

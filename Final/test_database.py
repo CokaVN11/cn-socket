@@ -1,9 +1,12 @@
+import io
 import sqlite3 as sql
 import json
 import faker
 import random
 import string
 import re
+from os import path
+from PIL import Image
 
 import datetime
 import ciso8601
@@ -395,26 +398,32 @@ try:
     # print(arrival_ts, departure_ts)
     # cx.execute(f"""update RESERVATION set DEPARTURE = {str(departure_ts)} where TOTAL = 200""")
 
-    rooms = cx.execute("select * from ROOM").fetchall()
-    
-    for room in rooms:
-        update_bed = f"update ROOM set BED = (?) where ID = {room['ID']}"
-        update_area = f"update ROOM set AREA = (?) where ID = {room['ID']}"
-        update_guest = f"update ROOM set GUEST = (?) where ID = {room['ID']}"
-        print(update_bed)
-        if room['TYPE'] =="Single":
-            cx.execute(update_bed, (1,))
-            cx.execute(update_area, (68,))
-            cx.execute(update_guest, (1,))
-        elif room['TYPE'] == "Double":
-            cx.execute(update_bed, (2,))
-            cx.execute(update_area, (76,))
-            cx.execute(update_guest, (2,))
-        else:
-            cx.execute(update_bed, (1,))
-            cx.execute(update_area, (90,))
-            cx.execute(update_guest, (1,))
+    # cx.execute("""alter table HOTEL
+    # add column IMG blob;""")
 
+    # for i in range(1, 11):
+    #     path_img = f"./server/hotel{i}.jpg"
+    #     size_img = path.getsize(path_img)
+    #     img = open(path_img, "rb")
+    #     data = img.read(size_img)
+    #     cx.execute(f"update HOTEL set IMG = (?) where ID = {i}", (data,))
+    #     print(path_img)
+    #     img.close()
+    # images = cx.execute("""select IMG from HOTEL""").fetchall()
+    # for img in images:
+    #     image = Image.open(io.BytesIO(img[0]))
+    #     image.show()
+    #     # input("Wait: ")
+
+    # cx.execute("""alter table ROOM add column IMG blob;""")
+
+    for i in range(1, 22):
+        path_img = f"./server/{i}.jpg"
+        size_img = path.getsize(path_img)
+        img = open(path_img, "rb")
+        data = img.read(size_img)
+        cx.execute(f"update ROOM set IMG = (?) where ID = {i}", (data, ))
+        img.close()
     sqlConn.commit()
     cx.close()
 
