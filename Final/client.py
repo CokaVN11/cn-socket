@@ -1492,6 +1492,112 @@ class ReservationPageFrame(tk.Frame):
         self.controller.show_frame("MenuFrame")
 
 
+class GuidePageFrame(tk.Frame):
+    def __init__(self, parent, controller, window, reserve_list):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+
+        self.parent = parent
+        self.reserve_list = reserve_list
+        self.number_items = len(reserve_list)
+        self.scroll_frame_height = convert_size(window, 3710)
+
+
+        self.__create_widgets(window)
+    
+    def __create_widgets(self, window):
+        self.canvas = tk.Canvas(master=self, bg="#ffffff", bd=0, relief="ridge",
+                                width=window.frameWidth, height=window.frameHeight,
+                                highlightthickness=0)
+        self.canvas.place(x=0, y=0)
+
+        # ---Scroll Bar---
+        self.scroll_bar = tk.Scrollbar(master=self, orient="vertical",
+                                       command=self.canvas.yview)
+
+        self.scroll_bar.pack(side=tk.RIGHT, fill="y")
+
+        self.scrollable_frame = tk.Frame(master=self.canvas,
+                                         width=window.frameWidth, height=self.scroll_frame_height,
+                                         bg="#ffffff")
+        self.scrollable_frame.bind("<Configure>",
+                                   lambda e: self.canvas.configure(
+                                       scrollregion=self.canvas.bbox("all")
+                                   ))
+
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scroll_bar.set)
+
+        # ================ Add widgets to scrollableFrame ==================#
+        self.container = tk.Frame(master=self.scrollable_frame,
+                                  width=window.frameWidth, height=self.scroll_frame_height,
+                                  bg="#ffffff")
+        self.container.place(x=0, y=0)
+
+        self.container_canvas = tk.Canvas(master=self.container, bg="#ffffff", bd=0, relief="ridge",
+                                     highlightthickness=0,
+                                     height=self.scroll_frame_height,
+                                     width=window.frameWidth)
+        self.container_canvas.place(x=0, y=0)
+
+
+        # ========== Button "Back" ===========
+        self.ImgBackBtn = convert_image(window, "./assets/Guide_backBtn.png", 227, 55)
+        self.back_btn = tk.Button(master=self.container, image=self.ImgBackBtn, bd=0,
+                                  highlightthickness=0, command=lambda: self.Back(),
+                                  relief="flat")
+        self.back_btn.place(x=convert_size(window, 55), y=convert_size(window, 44),
+                            width=convert_size(window, 227), height=convert_size(window, 55))
+        # ========== Title ===========
+        self.title = tk.Label(master=self.container, text="Booking Guide",
+                              fg="#47423D", bg="#ffffff", justify=tk.CENTER,
+                              font=("Noto Sans SemiBold", convert_size(window, 36)))
+        self.title.place(x=(window.frameWidth / 2), y=convert_size(window, 84), anchor="center")
+
+        # ========== Guide Steps ===========
+        self.ImgStep1 = convert_image(window, "./assets/Guide_step1.png", 1430, 536)
+        self.ImgStep2 = convert_image(window, "./assets/Guide_step2.png", 1430, 536)
+        self.ImgStep3 = convert_image(window, "./assets/Guide_step3.png", 1430, 536)
+        self.ImgStep4 = convert_image(window, "./assets/Guide_step4.png", 1430, 536)
+        self.ImgStep5 = convert_image(window, "./assets/Guide_step5.png", 1430, 536)
+        self.ImgStep6 = convert_image(window, "./assets/Guide_step6.png", 1430, 482)
+        self.step1Pic = self.container_canvas.create_image(
+            convert_size(window, 85 + 1431/2),
+            convert_size(self.window, 204 + 536/2),
+            image=self.ImgStep1
+        )
+        self.step2Pic = self.container_canvas.create_image(
+            convert_size(window, 85 + 1431/2),
+            convert_size(self.window, 792 + 536/2),
+            image=self.ImgStep2
+        )
+        self.step3Pic = self.container_canvas.create_image(
+            convert_size(window, 85 + 1431/2),
+            convert_size(self.window, 1380 + 536/2),
+            image=self.ImgStep3
+        )
+        self.step4Pic = self.container_canvas.create_image(
+            convert_size(window, 85 + 1431/2),
+            convert_size(self.window, 1968 + 536/2),
+            image=self.ImgStep4
+        )
+        self.step5Pic = self.container_canvas.create_image(
+            convert_size(window, 85 + 1431/2),
+            convert_size(self.window, 2556 + 536/2),
+            image=self.ImgStep5
+        )
+        self.step6Pic = self.container_canvas.create_image(
+            convert_size(window, 85 + 1431/2),
+            convert_size(self.window, 3144 + 536/2),
+            image=self.ImgStep6
+        )
+
+        
+
+    def Back(self):
+        self.controller.show_frame("MenuFrame")
+
+
 if __name__ == "__main__":
     connected = True
     app = App()
