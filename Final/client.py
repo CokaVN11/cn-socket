@@ -552,6 +552,15 @@ class HotelPageFrame(tk.Frame):
                            width=convert_size(window, 177), height=convert_size(window, 55))
         # ------
 
+        # ---Cart button---
+        self.ImgCartBtn = convert_image(window, "./assets/LK_Cart.png", 88, 88)
+        self.cart_btn = tk.Button(master=self, image=self.ImgCartBtn, borderwidth=0, relief="flat",
+                                  highlightthickness=0,
+                                  command=lambda: self.controller.show_cart_frame(window.booking_list))
+        self.cart_btn.place(x=convert_size(window, 1484), y=convert_size(window, 786),
+                            width=convert_size(window, 88), height=convert_size(window, 88))
+        # ------
+
         # ---Hotel Card---
         self.cards = {}
         column = 0
@@ -616,7 +625,7 @@ class HotelListFrame(tk.Frame):
         self.container.pack(side="top", fill="both", expand=1)
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
-
+        
         self.frames = {}
 
         for F in range(self.begin_page, self.end_page + 1):
