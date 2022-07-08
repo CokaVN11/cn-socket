@@ -552,6 +552,15 @@ class HotelPageFrame(tk.Frame):
                            width=convert_size(window, 177), height=convert_size(window, 55))
         # ------
 
+        # ---Cart button---
+        self.ImgCartBtn = convert_image(window, "./assets/LK_Cart.png", 88, 88)
+        self.cart_btn = tk.Button(master=self, image=self.ImgCartBtn, borderwidth=0, relief="flat",
+                                  highlightthickness=0,
+                                  command=lambda: self.controller.show_cart_frame(window.booking_list))
+        self.cart_btn.place(x=convert_size(window, 1484), y=convert_size(window, 786),
+                            width=convert_size(window, 88), height=convert_size(window, 88))
+        # ------
+
         # ---Hotel Card---
         self.cards = {}
         column = 0
@@ -564,27 +573,33 @@ class HotelPageFrame(tk.Frame):
             column += 1
 
         # ---Declare button image---
-        self.ImgUnclick = convert_image(window, "./assets/LOH_Unclicked.png", 76, 76)
-        self.ImgClicked = convert_image(window, "./assets/LOH_Clicked.png", 76, 76)
+        self.ImgPageBtn = convert_image(window, "./assets/LOH_pageBtn.png", 76, 76)
+        self.ImgNextBtn = convert_image(window, "./assets/LOH_nextBtn.png", 76, 76)
+        self.ImgPrevBtn = convert_image(window, "./assets/LOH_prevBtn.png", 76, 76)
         # ------
 
         # ---Pagination button---
-        self.next_btn = tk.Button(master=self, text="NEXT", font=("Noto Sans SemiBold", convert_size(window, 16)),
-                                  image=self.ImgClicked, compound=tk.CENTER,
+        self.next_btn = tk.Button(master=self, text="", font=("Noto Sans SemiBold", convert_size(window, 16)),
+                                  image=self.ImgNextBtn, compound=tk.CENTER,
                                   borderwidth=0, highlightthickness=0,
                                   command=lambda: controller.go_to_page(self.page_number + 1), relief="flat")
-        self.prev_btn = tk.Button(master=self, text="PREV", font=("Noto Sans SemiBold", convert_size(window, 16)),
-                                  image=self.ImgClicked, compound=tk.CENTER,
+        self.prev_btn = tk.Button(master=self, text="", font=("Noto Sans SemiBold", convert_size(window, 16)),
+                                  image=self.ImgPrevBtn, compound=tk.CENTER,
                                   borderwidth=0, highlightthickness=0,
                                   command=lambda: controller.go_to_page(self.page_number - 1), relief="flat")
 
-        self.page_label = tk.Label(master=self, text=f"{self.page_number}", image=self.ImgClicked, compound=tk.CENTER,
-                                   font=("Noto Sans SemiBold", convert_size(window, 16)))
-        self.page_label.place(x=convert_size(window, 506 + 102 * 2), y=convert_size(window, 780),
+        self.page_label = tk.Label(master=self, 
+                                   text=f"{self.page_number}", 
+                                   foreground="#35bdda",
+                                   background="white",
+                                   image=self.ImgPageBtn, 
+                                   compound=tk.CENTER,
+                                   font=("Noto Sans SemiBold", convert_size(window, 24)))
+        self.page_label.place(x=convert_size(window, 762), y=convert_size(window, 780),
                               width=convert_size(window, 76), height=convert_size(window, 76))
-        self.next_btn.place(x=convert_size(window, 506 + 102 * 3), y=convert_size(window, 780),
+        self.next_btn.place(x=convert_size(window, 867), y=convert_size(window, 780),
                             width=convert_size(window, 76), height=convert_size(window, 76))
-        self.prev_btn.place(x=convert_size(window, 506 + 102 * 1), y=convert_size(window, 780),
+        self.prev_btn.place(x=convert_size(window, 657), y=convert_size(window, 780),
                             width=convert_size(window, 76), height=convert_size(window, 76))
 
     def Back(self):
@@ -610,7 +625,7 @@ class HotelListFrame(tk.Frame):
         self.container.pack(side="top", fill="both", expand=1)
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
-
+        
         self.frames = {}
 
         for F in range(self.begin_page, self.end_page + 1):
@@ -927,12 +942,12 @@ class RoomPageFrame(tk.Frame):
         self.back_btn.place(x=convert_size(window, 41), y=convert_size(window, 44),
                             width=convert_size(window, 227), height=convert_size(window, 55))
         # ---Cart button---
-        self.ImgCartBtn = convert_image(window, "./assets/LK_Cart.png", 109, 109)
+        self.ImgCartBtn = convert_image(window, "./assets/LK_Cart.png", 88, 88)
         self.cart_btn = tk.Button(master=self.container, image=self.ImgCartBtn, borderwidth=0, relief="flat",
                                   highlightthickness=0,
                                   command=lambda: self.controller.show_cart_frame(window.booking_list))
-        self.cart_btn.place(x=convert_size(window, 1462), y=convert_size(window, 30),
-                            width=convert_size(window, 109), height=convert_size(window, 109))
+        self.cart_btn.place(x=convert_size(window, 1484), y=convert_size(window, 786),
+                            width=convert_size(window, 88), height=convert_size(window, 88))
 
         # ---Hotel name title---
         self.hotel_name_label = tk.Label(master=self.container, text=f"{self.hotel_name}",
