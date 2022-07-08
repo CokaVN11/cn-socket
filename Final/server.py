@@ -170,6 +170,7 @@ def SendHotelList(conn, addr, sqlConn: sqlite3.Connection):
             conn.sendall(data.encode(FORMAT))
             for img in images:
                 len_data = len(img)
+                print(len_data)
                 send_s(conn, str(len_data))
                 conn.sendall(img)
             # conn.sendall(data)

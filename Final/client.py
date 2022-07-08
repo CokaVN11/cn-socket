@@ -86,8 +86,8 @@ class App(tk.Tk):
 
     def on_closing(self):
         print(QUIT_MSG)
-        for room in self.booking_list:
-            print(room)
+        # for room in self.booking_list:
+        #     print(room)
         send_s(client, QUIT_MSG)
         client.close()
         self.quit()
@@ -495,7 +495,7 @@ class CardHotelFrame(tk.Frame):
         self.ImgLookupBtn = convert_image(window, "./assets/LOH_LookupBtn.png", 197, 65)
         self.ImgDisLookupBtn = convert_image(window, "./assets/LOH_LookupDisabled.png", 197, 65)
         # ------
-        self.card_thumbnail = self.canvas.create_image(self.thumbnail_x, ceil(261 / 2) - 15, image=self.ImgThumbnail)
+        self.card_thumbnail = self.canvas.create_image(self.thumbnail_x, convert_size(window, ceil(261 / 2) - 15), image=self.ImgThumbnail)
         self.card_thumbnail_template = self.canvas.create_image(self.thumbnail_x,
                                                                 self.thumbnail_y,
                                                                 image=self.ImgThumbnailTemplate)
@@ -835,7 +835,7 @@ class CardRoomFrame(tk.Frame):
         self.ImgReserveDis = convert_image(window, "./assets/LK_ReserveDisabled.png", 234, 68)
 
         # ---Card thumbnail---
-        self.card_thumbnail = self.canvas.create_image(485 / 2 - 10, 324 / 2 - 5, image=self.ImgThumbnail)
+        self.card_thumbnail = self.canvas.create_image(convert_size(window, 485 / 2), convert_size(window, 324 / 2), image=self.ImgThumbnail)
         self.card_thumbnail_template = self.canvas.create_image(self.thumbnail_x,
                                                                 self.thumbnail_y, image=self.ImgThumbnailTemplate)
         # ---Card status---
@@ -1041,7 +1041,7 @@ class CardCartFrame(tk.Frame):
         self.canvas.place(x=0, y=0)
 
         # ---Card thumbnail---
-        self.card_thumbnail = self.canvas.create_image(297 / 2, 100, image=self.ImgThumbnail)
+        self.card_thumbnail = self.canvas.create_image(convert_size(window, 297 / 2), convert_size(window, 100), image=self.ImgThumbnail)
         self.card_thumbnail_template = self.canvas.create_image(self.thumbnail_x,
                                                                 self.thumbnail_y,
                                                                 image=self.ImgThumbnailTemplate)
@@ -1356,7 +1356,7 @@ class CardReservationFrame(tk.Frame):
         self.canvas.place(x=0, y=0)
 
         # ---Thumbnail---
-        self.thumbnail = self.canvas.create_image(204, 136, image=self.ImgThumbnail)
+        self.thumbnail = self.canvas.create_image(convert_size(window, 204), convert_size(window, 136), image=self.ImgThumbnail)
         self.thumbnail_template = self.canvas.create_image(self.thumbnail_x, self.thumbnail_y,
                                                            image=self.ImgThumbnailTemplate)
 
