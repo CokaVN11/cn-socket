@@ -29,7 +29,9 @@ def send_s(conn: socket.socket(), msg: str):
 
 def recv_s(conn: socket.socket()):
     if conn:
-        msg = conn.recv(BUFSIZ).decode(FORMAT).strip()
+        msg = conn.recv(BUFSIZ)
+        print(msg)
+        msg = msg.decode(FORMAT)
         conn.sendall(msg.encode(FORMAT))
         return msg
     else:
@@ -143,6 +145,7 @@ def ShowHotelList(client):
         len_data = int(recv_s(client))
         print(len_data)
         img = client.recv(len_data)
+        send_s(client, "1")
         hotel['IMG'] = img
     # first = True
     # for hotel in hotels:
