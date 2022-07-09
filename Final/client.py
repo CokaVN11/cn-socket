@@ -57,6 +57,7 @@ class App(tk.Tk):
         self.hotel_list = {}
         self.reserve_list = {}
         self.booking_list = []
+        self.already_popup = False
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.geometry(self.resolution)
@@ -504,7 +505,7 @@ class CardHotelFrame(tk.Frame):
 
         # Button Lookup
         self.lookupBtn = tk.Button(master=self, image=self.ImgLookupBtn, borderwidth=0,
-                                   highlightthickness=0, command=lambda: self.popup_date(), relief="flat")
+                                   highlightthickness=0, command=lambda: self.popup_date(window), relief="flat")
         self.lookupBtn.place(x=self.btn_x, y=self.btn_y, width=convert_size(window, 197),
                              height=convert_size(window, 65))
         # Card name
@@ -519,9 +520,14 @@ class CardHotelFrame(tk.Frame):
         self.desc_label.place(x=self.desc_x, y=self.desc_y)
         # ------
 
-    def popup_date(self):
+    def popup_date(self, window):
+        if window.already_popup:
+            return
+        else:
+            window.already_popup = True
         self.popup_screen = DatePopup(self, self.window)
         self.wait_window(self.popup_screen.top)
+        window.already_popup = False
         room_list = LookUpRoom(client, self.card_name, self.arrival_value(), self.depart_value())
         if room_list is not None:
             self.controller.show_room_frame(room_list, self.card_name, self.hotel_page, self.arrival_value(),
