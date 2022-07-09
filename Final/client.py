@@ -519,10 +519,10 @@ class CardHotelFrame(tk.Frame):
                                    foreground="#7D8693",
                                    background="white",
                                    justify=tk.LEFT,
-                                   wraplength=370,
+                                   wraplength=convert_size(window, 380),
                                    font=("Hind Guntur Medium",
-                                         convert_size(window, 12)))
-        self.desc_label.place(x=self.desc_x, y=self.desc_y)
+                                         convert_size(window, 14)))
+        self.desc_label.place(x=self.desc_x, y=self.desc_y, height=convert_size(window, 150))
         # ------
 
     def popup_date(self, window):

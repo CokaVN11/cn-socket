@@ -166,12 +166,14 @@ def renderCard(Column, cardName, cardDescription, cardStatus, cardThumbPath):
         master=cardFrame,
         text=cardDescription,
         foreground="#7D8693",
-        background="white",
+        background="#444444",
         justify=LEFT,
-        font=("Hind Guntur Medium", convertSize(16))
+        wraplength=convertSize(380),
+        font=("Hind Guntur Medium", convertSize(14)),
     ).place(
         x=descPosX,
         y=descPosY,
+        height=convertSize(150)
     )
 
     if cardStatus == 1:
@@ -204,8 +206,8 @@ def renderCard(Column, cardName, cardDescription, cardStatus, cardThumbPath):
             height=convertSize(65))
 
 
-renderCard(1, "Lake Place", "123123123", 1, "LOH_thumbnail1.png")
-renderCard(2, "Rubidi", "Lorem lorem", 0, "LOH_thumbnail2.png")
+renderCard(1, "Lake Place", "123123123 12313 nghhe nknkdgn zxc vvcxvcxvcxv adsa  xvc gfgf fdncvncmvn", 1, "LOH_thumbnail1.png")
+renderCard(2, "Rubidi", "Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem v Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem lorem 14 15 16 17 18 hehe 20 14 15 16 17 18 hehe 20", 0, "LOH_thumbnail2.png")
 renderCard(3, "Diamond", "HCMUs", 1, "LOH_thumbnail3.png")
 
 # ------------- Chuyen trang -------------#
