@@ -656,9 +656,16 @@ class HotelListFrame(tk.Frame):
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
-        tk.Label(master=self, text=f"{self.controller.username}",
-                 font=("Noto Sans SemiBold", 20), background="#ffffff").place(x=convert_size(controller, 1420),
-                                                                              y=convert_size(controller, 40))
+        tk.Label(master=self, 
+                 text=f"{self.controller.username}",
+                 anchor="e",
+                 justify=tk.RIGHT,
+                 font=("Noto Sans SemiBold", 20), 
+                 background="#ffffff").place(
+                                        x=convert_size(controller, 1530),
+                                        y=convert_size(controller, 70),
+                                        anchor="e")
+
         self.go_to_page(self.begin_page)
 
     def go_to_page(self, page_number):
