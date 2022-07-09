@@ -71,7 +71,7 @@ class App(tk.Tk):
 
         self.frames = {}
 
-        for F in (LoginFrame, SignupFrame, MenuFrame, HotelListFrame, ReservationPageFrame):
+        for F in (LoginFrame, SignupFrame, MenuFrame, HotelListFrame, ReservationPageFrame, GuidePageFrame):
             page_name = F.__name__
             if page_name != HotelListFrame.__name__ and page_name != ReservationPageFrame.__name__:
                 frame = F(parent=self.container, controller=self)
@@ -409,7 +409,8 @@ class MenuFrame(tk.Frame):
 
         # ---Guide button---
         self.GuideBtn = tk.Button(master=self, image=self.ImgGuide, borderwidth=0,
-                                  highlightthickness=0, command=lambda: btn_clicked(), relief="flat")
+                                  highlightthickness=0, command=lambda: self.controller.show_frame("GuidePageFrame"),
+                                  relief="flat")
         self.GuideBtn.place(x=convert_size(controller, 891), y=convert_size(controller, 50),
                             width=convert_size(controller, 182), height=convert_size(controller, 258))
         # ------
@@ -495,7 +496,8 @@ class CardHotelFrame(tk.Frame):
         self.ImgLookupBtn = convert_image(window, "./assets/LOH_LookupBtn.png", 197, 65)
         self.ImgDisLookupBtn = convert_image(window, "./assets/LOH_LookupDisabled.png", 197, 65)
         # ------
-        self.card_thumbnail = self.canvas.create_image(self.thumbnail_x, convert_size(window, ceil(261 / 2) - 15), image=self.ImgThumbnail)
+        self.card_thumbnail = self.canvas.create_image(self.thumbnail_x, convert_size(window, ceil(261 / 2) - 15),
+                                                       image=self.ImgThumbnail)
         self.card_thumbnail_template = self.canvas.create_image(self.thumbnail_x,
                                                                 self.thumbnail_y,
                                                                 image=self.ImgThumbnailTemplate)
@@ -835,7 +837,8 @@ class CardRoomFrame(tk.Frame):
         self.ImgReserveDis = convert_image(window, "./assets/LK_ReserveDisabled.png", 234, 68)
 
         # ---Card thumbnail---
-        self.card_thumbnail = self.canvas.create_image(convert_size(window, 485 / 2), convert_size(window, 324 / 2), image=self.ImgThumbnail)
+        self.card_thumbnail = self.canvas.create_image(convert_size(window, 485 / 2), convert_size(window, 324 / 2),
+                                                       image=self.ImgThumbnail)
         self.card_thumbnail_template = self.canvas.create_image(self.thumbnail_x,
                                                                 self.thumbnail_y, image=self.ImgThumbnailTemplate)
         # ---Card status---
@@ -1041,7 +1044,8 @@ class CardCartFrame(tk.Frame):
         self.canvas.place(x=0, y=0)
 
         # ---Card thumbnail---
-        self.card_thumbnail = self.canvas.create_image(convert_size(window, 297 / 2), convert_size(window, 100), image=self.ImgThumbnail)
+        self.card_thumbnail = self.canvas.create_image(convert_size(window, 297 / 2), convert_size(window, 100),
+                                                       image=self.ImgThumbnail)
         self.card_thumbnail_template = self.canvas.create_image(self.thumbnail_x,
                                                                 self.thumbnail_y,
                                                                 image=self.ImgThumbnailTemplate)
@@ -1356,7 +1360,8 @@ class CardReservationFrame(tk.Frame):
         self.canvas.place(x=0, y=0)
 
         # ---Thumbnail---
-        self.thumbnail = self.canvas.create_image(convert_size(window, 204), convert_size(window, 136), image=self.ImgThumbnail)
+        self.thumbnail = self.canvas.create_image(convert_size(window, 204), convert_size(window, 136),
+                                                  image=self.ImgThumbnail)
         self.thumbnail_template = self.canvas.create_image(self.thumbnail_x, self.thumbnail_y,
                                                            image=self.ImgThumbnailTemplate)
 
@@ -1493,18 +1498,16 @@ class ReservationPageFrame(tk.Frame):
 
 
 class GuidePageFrame(tk.Frame):
-    def __init__(self, parent, controller, window, reserve_list):
+    def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
         self.parent = parent
-        self.reserve_list = reserve_list
-        self.number_items = len(reserve_list)
-        self.scroll_frame_height = convert_size(window, 3710)
+        self.number_items = 6
+        self.scroll_frame_height = convert_size(controller, 3710)
 
+        self.__create_widgets(controller)
 
-        self.__create_widgets(window)
-    
     def __create_widgets(self, window):
         self.canvas = tk.Canvas(master=self, bg="#ffffff", bd=0, relief="ridge",
                                 width=window.frameWidth, height=window.frameHeight,
@@ -1535,11 +1538,10 @@ class GuidePageFrame(tk.Frame):
         self.container.place(x=0, y=0)
 
         self.container_canvas = tk.Canvas(master=self.container, bg="#ffffff", bd=0, relief="ridge",
-                                     highlightthickness=0,
-                                     height=self.scroll_frame_height,
-                                     width=window.frameWidth)
+                                          highlightthickness=0,
+                                          height=self.scroll_frame_height,
+                                          width=window.frameWidth)
         self.container_canvas.place(x=0, y=0)
-
 
         # ========== Button "Back" ===========
         self.ImgBackBtn = convert_image(window, "./assets/Guide_backBtn.png", 227, 55)
@@ -1562,37 +1564,35 @@ class GuidePageFrame(tk.Frame):
         self.ImgStep5 = convert_image(window, "./assets/Guide_step5.png", 1430, 536)
         self.ImgStep6 = convert_image(window, "./assets/Guide_step6.png", 1430, 482)
         self.step1Pic = self.container_canvas.create_image(
-            convert_size(window, 85 + 1431/2),
-            convert_size(self.window, 204 + 536/2),
+            convert_size(window, 85 + 1431 / 2),
+            convert_size(window, 204 + 536 / 2),
             image=self.ImgStep1
         )
         self.step2Pic = self.container_canvas.create_image(
-            convert_size(window, 85 + 1431/2),
-            convert_size(self.window, 792 + 536/2),
+            convert_size(window, 85 + 1431 / 2),
+            convert_size(window, 792 + 536 / 2),
             image=self.ImgStep2
         )
         self.step3Pic = self.container_canvas.create_image(
-            convert_size(window, 85 + 1431/2),
-            convert_size(self.window, 1380 + 536/2),
+            convert_size(window, 85 + 1431 / 2),
+            convert_size(window, 1380 + 536 / 2),
             image=self.ImgStep3
         )
         self.step4Pic = self.container_canvas.create_image(
-            convert_size(window, 85 + 1431/2),
-            convert_size(self.window, 1968 + 536/2),
+            convert_size(window, 85 + 1431 / 2),
+            convert_size(window, 1968 + 536 / 2),
             image=self.ImgStep4
         )
         self.step5Pic = self.container_canvas.create_image(
-            convert_size(window, 85 + 1431/2),
-            convert_size(self.window, 2556 + 536/2),
+            convert_size(window, 85 + 1431 / 2),
+            convert_size(window, 2556 + 536 / 2),
             image=self.ImgStep5
         )
         self.step6Pic = self.container_canvas.create_image(
-            convert_size(window, 85 + 1431/2),
-            convert_size(self.window, 3144 + 536/2),
+            convert_size(window, 85 + 1431 / 2),
+            convert_size(window, 3144 + 536 / 2),
             image=self.ImgStep6
         )
-
-        
 
     def Back(self):
         self.controller.show_frame("MenuFrame")

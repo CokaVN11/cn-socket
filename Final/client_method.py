@@ -141,6 +141,7 @@ def ShowHotelList(client):
 
     for hotel in hotels:
         len_data = int(recv_s(client))
+        print(len_data)
         img = client.recv(len_data)
         hotel['IMG'] = img
     # first = True
