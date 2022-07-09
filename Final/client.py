@@ -514,9 +514,14 @@ class CardHotelFrame(tk.Frame):
         self.name_label.place(x=self.name_x, y=self.name_y)
         # ------
         # Card description
-        self.desc_label = tk.Label(master=self, text=self.card_description, foreground="#7D8693",
-                                   background="white", justify=tk.LEFT,
-                                   font=("Hind Guntur Medium", convert_size(window, 16)))
+        self.desc_label = tk.Label(master=self,
+                                   text=self.card_description,
+                                   foreground="#7D8693",
+                                   background="white",
+                                   justify=tk.LEFT,
+                                   wraplength=370,
+                                   font=("Hind Guntur Medium",
+                                         convert_size(window, 12)))
         self.desc_label.place(x=self.desc_x, y=self.desc_y)
         # ------
 
@@ -586,7 +591,7 @@ class HotelPageFrame(tk.Frame):
         column = 0
         for i in self.hotels:
             self.cards[i['ID']] = CardHotelFrame(self, controller, window, i['ID'], i['NAME'],
-                                                 f"{i['DESC']} {self.page_number}",
+                                                 i['DESC'],
                                                  int(i['AVAILABLE']), i['IMG'], self.page_number)
             self.cards[i['ID']].place(x=self.first_card_x + self.card_discrepancy * column, y=self.first_card_y,
                                       width=self.card_width, height=self.card_height)

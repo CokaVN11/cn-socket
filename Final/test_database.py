@@ -13,8 +13,10 @@ import ciso8601
 import sys
 
 special_char = re.compile("[@_!#$%^&*()<>?/\|}{~:]")
-hotel_names = ["Lake Place", "Diamond", "Rubidi", "Samochy",
-               "GoRo", "Hikoga", "Holly Good", "Raxle", "Ankani", "Wonder Koll"]
+hotel_names = [
+    "Lake Place", "Diamond", "Rubidi", "Samochy", "GoRo", "Hikoga",
+    "Holly Good", "Raxle", "Ankani", "Wonder Koll"
+]
 
 # hotel_names = ["Mount Place", "Prism", "Hokaido", "Alaski", "Chill Home",
 #                "Relax Spring", "Okaimi", "Rilax", "Glutami", "Amaze Koll", "Aquamarine Tower", "Northern Shrine", "Lord's Palms", "Emerald Lagoon", "Antique Legacy", "Prince's Bazaar", "Solar", "Amenity", "Grand", "Summit"]
@@ -72,7 +74,7 @@ def deleteTable(table: str):
 
 def deleteUsernameInvalid(table: str):
     try:
-        sqlConn = sql.connect("sql.db")
+        sqlConn = sql.connect(DB)
         cursor = sqlConn.cursor()
         cursor.execute("SELECT rowid, * FROM " + table)
         rows = cursor.fetchall()
@@ -220,7 +222,7 @@ def insert_room(sqlConn: sql.Connection):
             elif room_type == "V.I.P":
                 price = 500
                 desc = descs[2]
-            room_data = (i+1, room_type, desc, vanc, price)
+            room_data = (i + 1, room_type, desc, vanc, price)
             print(room_data)
             # print("a")
             insert_cmd = "INSERT INTO ROOM (HOTEL_ID, TYPE, DESC, VACANCIES, PRICE) VALUES (?,?,?,?,?)"
@@ -248,6 +250,8 @@ def combine_room(sqlConn: sql.Connection):
         print("------")
     sqlConn.commit()
     cx.close()
+
+
 # deleteAll()
 # Generate data
 # fake = faker.Faker()
@@ -298,7 +302,6 @@ def combine_room(sqlConn: sql.Connection):
 #         sqlConn.close()
 #         print("SQLite connection closed")
 # -----------
-
 
 try:
     sqlConn = sql.connect(DB)
@@ -417,13 +420,20 @@ try:
 
     # cx.execute("""alter table ROOM add column IMG blob;""")
 
-    for i in range(1, 22):
-        path_img = f"./server/{i}.jpg"
-        size_img = path.getsize(path_img)
-        img = open(path_img, "rb")
-        data = img.read(size_img)
-        cx.execute(f"update ROOM set IMG = (?) where ID = {i}", (data, ))
-        img.close()
+    # for i in range(1, 22):
+    #     path_img = f"./server/{i}.jpg"
+    #     size_img = path.getsize(path_img)
+    #     img = open(path_img, "rb")
+    #     data = img.read(size_img)
+    #     cx.execute(f"update ROOM set IMG = (?) where ID = {i}", (data, ))
+    #     img.close()
+
+    cx.execute(
+        """update HOTEL
+               set DESC = (?) where rowid = 10""",
+        ("Wondel Koll, welcomes you in a real cosmopolitan, pulsing milieu, at the same time offering peace and intimate retirement, just in the heart of the city centre. Timeless elegance tailored for the demands of our time.",
+         ))
+
     sqlConn.commit()
     cx.close()
 
