@@ -1515,6 +1515,48 @@ class ReservationPageFrame(tk.Frame):
         self.controller.show_frame("MenuFrame")
 
 
+class NotePopup:
+    def __init__(self, master, window):
+
+        self.top = tk.Toplevel(master)
+        # print("Pop up")
+
+
+        # --Title--
+        self.note_title = tk.Label(self.top, 
+                                   text="Any note ?",
+                                   font=("Noto Sans Bold", convert_size(window, 16)))
+        self.note_title.grid(row=0, column=0, pady=10)
+
+
+        # --Entry--
+        self.note_Entry = tk.Text(self.top, 
+                                    width=50, # Số kí tự trong 1 dòng (~line wrap)
+                                    height=5, # Số dòng mà khung hiển thị
+                                    font=("Noto Sans Bold", convert_size(window, 13)))
+        self.note_Entry.grid(row=1, column=0, pady=20)
+
+
+
+        # ---Confirm button---
+        self.confirm_btn = tk.Button(self.top, text="Confirm", font=convert_size(window, 15),
+                                     command=self.confirm_and_out, relief="ridge")
+        self.confirm_btn.grid(row=2, column=0, pady=20)
+
+        # ------
+
+    def confirm_and_out(self):
+        self.note_input = self.note_Entry.get("1.0", "end-1c") # Lấy nội dung từ đầu tới cuối
+        self.top.destroy()
+
+
+
+
+
+
+
+
+
 class GuidePageFrame(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)

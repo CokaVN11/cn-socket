@@ -1,6 +1,8 @@
+from importlib.metadata import entry_points
 from tkinter import *
 from math import floor
 from PIL import Image, ImageTk
+from tkinter.simpledialog import askstring
 
 window = Tk()
 print(window.winfo_screenwidth(), window.winfo_screenheight())
@@ -91,7 +93,7 @@ infoCanvas.place(x=0, y=0)
 
 # =================== Init Scrollbar for ItemFrame ======================#
 numberOfItem = 6  # The number of items in Cart
-scrollFrameHeight = convertSize(102 + numberOfItem * 222)
+scrollFrameHeight = convertSize(102 + numberOfItem * 222) + 500
 
 scrollBar = Scrollbar(itemFrame, orient='vertical', command=itemCanvas.yview)
 scrollBar.pack(side=RIGHT, fill=Y)
@@ -165,7 +167,7 @@ decreaseBtnY = convertSize(245 - 102)
 increaseBtnX = convertSize(406 - 31)
 increaseBtnY = convertSize(245 - 102)
 
-ImgThumbnail = convertImage("Cart_thumbnail.png", 819, 200)
+ImgThumbnail = convertImage("Cart_room1_single.png", 819, 200)
 ImgIncreaseBtn = convertImage("Cart_increaseBtn.png", 28, 28)
 ImgDecreaseBtn = convertImage("Cart_decreaseBtn.png", 28, 28)
 
@@ -299,6 +301,11 @@ renderCard(5, "Lake Place", "V.I.P Room",
 renderCard(6, "Lake Place", "Single Room",
            "04/07/2022", "07/07/2022", 2, "#thumbnailPath", 200)
 
+entryNote = askstring(
+    "Input", 
+    "What is your first name?",
+    parent=containerFrame
+)
 # ==================== INFORMATION FRAME =====================#
 ImgBackground = convertImage("Cart_background.png", 603, 516)
 ImgConfirmBtn = convertImage("Cart_confirmBtn.png", 455, 87)

@@ -7,81 +7,104 @@ from tkcalendar import Calendar
 
 class popup_window(object):
     def __init__(self, master):
-        self.departDate = None
-        self.arrivalDate = None
         top = self.top = Toplevel(master)
+        # --Title--
+        self.note_title = Label(self.top, text="Any note ?",
+                                      font=("Noto Sans Bold", 16))
+        self.note_title.grid(row=0, column=0, pady=10)
 
-        current_time = datetime.datetime.now()
-        self.arrivalChose = False
-        self.departChose = False
 
-        # ==================== Calendar for Arrival Date ====================#
-        self.arrivalTitle = Label(top,
-                                  text="CHOOSE ARRIVAL DATE : ",
-                                  font=("Noto Sans Bold", 16)
-                                  ).grid(row=0, column=0, pady=10)
+        # --Entry--
+        self.note_Entry = Text(self.top, 
+                                    width=50, # Số kí tự trong 1 dòng (~line wrap)
+                                    height=3, # Số dòng mà khung hiển thị
+                                    font=("Noto Sans Bold", 14))
+        self.note_Entry.grid(row=1, column=0, pady=20)
 
-        self.arrivalCalendar = Calendar(top,
-                                        selectmode='day',
-                                        font="14",
-                                        year=current_time.year,
-                                        month=current_time.month,
-                                        day=current_time.day
-                                        )
-        self.arrivalCalendar.grid(row=1, column=0, padx=12)
 
-        # Arrival Date Label
-        self.arrivalLabel = Label(top, text="", font=("Noto Sans Bold", 14))
-        self.arrivalLabel.grid(row=2, column=0, pady=20)
+        # ---Confirm button---
+        self.confirm_btn = Button(self.top, text="Confirm", font=15,
+                                     command=self.confirmAndOut, relief="ridge")
+        self.confirm_btn.grid(row=2, column=0, pady=20)
+        # self.departDate = None
+        # self.arrivalDate = None
 
-        # Arrival Button
-        self.arrivalBtn = Button(top, text='Choose', font=6, command=self.showArrivalDate)
-        self.arrivalBtn.grid(row=3, column=0)
+        # current_time = datetime.datetime.now()
+        # self.arrivalChose = False
+        # self.departChose = False
 
-        # ========================= Confirm Button =========================#
-        self.confirmBtn = Button(top, text='Confirm', font=15, command=self.confirmAndOut)
-        self.confirmBtn.grid(row=4, column=1, pady=20)
+        # # ==================== Calendar for Arrival Date ====================#
+        # self.arrivalTitle = Label(top,
+        #                           text="CHOOSE ARRIVAL DATE : ",
+        #                           font=("Noto Sans Bold", 16)
+        #                           ).grid(row=0, column=0, pady=10)
 
-        # ==================== Calendar for Depart Date ====================#
-        self.departTitle = Label(top, text="CHOOSE DEPARTURE DATE : ", font=("Noto Sans Bold", 16)).grid(row=0, column=2, pady=10)
+        # self.arrivalCalendar = Calendar(top,
+        #                                 selectmode='day',
+        #                                 font="14",
+        #                                 year=current_time.year,
+        #                                 month=current_time.month,
+        #                                 day=current_time.day
+        #                                 )
+        # self.arrivalCalendar.grid(row=1, column=0, padx=12)
 
-        self.departCalendar = Calendar(top,
-                                       selectmode='day',
-                                       font="14",
-                                       year=current_time.year,
-                                       month=current_time.month,
-                                       day=current_time.day
-                                       )
-        self.departCalendar.grid(row=1, column=2, padx=12)
+        # # Arrival Date Label
+        # self.arrivalLabel = Label(top, text="", font=("Noto Sans Bold", 14))
+        # self.arrivalLabel.grid(row=2, column=0, pady=20)
 
-        # Depart Date Label
-        self.departLabel = Label(top,
-                                 text="",
-                                 font=("Noto Sans Bold", 14)
-                                 )
-        self.departLabel.grid(row=2, column=2, pady=20)
+        # # Arrival Button
+        # self.arrivalBtn = Button(top, text='Choose', font=6, command=self.showArrivalDate)
+        # self.arrivalBtn.grid(row=3, column=0)
 
-        # Depart Button
-        self.departBtn = Button(top, text='Choose', font=6, command=self.showDepartDate)
-        self.departBtn.grid(row=3, column=2)
+        # # ========================= Confirm Button =========================#
+        # self.confirmBtn = Button(top, text='Confirm', font=15, command=self.confirmAndOut)
+        # self.confirmBtn.grid(row=4, column=1, pady=20)
 
-    def showArrivalDate(self):
-        self.arrivalChose = True
-        self.arrivalLabel.config(text="Selected Arrival Date : " + self.arrivalCalendar.get_date())
+        # # ==================== Calendar for Depart Date ====================#
+        # self.departTitle = Label(top, text="CHOOSE DEPARTURE DATE : ", font=("Noto Sans Bold", 16)).grid(row=0, column=2, pady=10)
 
-    def showDepartDate(self):
-        self.departChose = True
-        self.departLabel.config(text="Selected Departure Date : " + self.departCalendar.get_date())
+        # self.departCalendar = Calendar(top,
+        #                                selectmode='day',
+        #                                font="14",
+        #                                year=current_time.year,
+        #                                month=current_time.month,
+        #                                day=current_time.day
+        #                                )
+        # self.departCalendar.grid(row=1, column=2, padx=12)
 
+        # # Depart Date Label
+        # self.departLabel = Label(top,
+        #                          text="",
+        #                          font=("Noto Sans Bold", 14)
+        #                          )
+        # self.departLabel.grid(row=2, column=2, pady=20)
+
+        # # Depart Button
+        # self.departBtn = Button(top, text='Choose', font=6, command=self.showDepartDate)
+        # self.departBtn.grid(row=3, column=2)
+
+    # def showArrivalDate(self):
+    #     self.arrivalChose = True
+    #     self.arrivalLabel.config(text="Selected Arrival Date : " + self.arrivalCalendar.get_date())
+
+    # def showDepartDate(self):
+    #     self.departChose = True
+    #     self.departLabel.config(text="Selected Departure Date : " + self.departCalendar.get_date())
+
+    # def confirmAndOut(self):
+    #     self.arrivalDate = self.arrivalCalendar.get_date()
+    #     self.departDate = self.departCalendar.get_date()
+    #     if not self.arrivalChose:
+    #         self.arrivalLabel.config(text="You haven't chosen Arrival Date")
+    #         return
+    #     if not self.departChose:
+    #         self.departLabel.config(text="You haven't chosen Departure Date")
+    #         return
+    #     self.top.destroy()
+    
     def confirmAndOut(self):
-        self.arrivalDate = self.arrivalCalendar.get_date()
-        self.departDate = self.departCalendar.get_date()
-        if not self.arrivalChose:
-            self.arrivalLabel.config(text="You haven't chosen Arrival Date")
-            return
-        if not self.departChose:
-            self.departLabel.config(text="You haven't chosen Departure Date")
-            return
+        self.noteInput = self.note_Entry.get("1.0", "end-1c") # Lấy nội dung từ đầu tới cuối
+        print(self.noteInput)
         self.top.destroy()
 
 
