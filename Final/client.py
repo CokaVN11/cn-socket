@@ -1536,17 +1536,33 @@ class NotePopup:
                                     font=("Noto Sans Bold", convert_size(window, 13)))
         self.note_Entry.grid(row=1, column=0, pady=20)
 
+        # -- Length -- #
+        self.note_len = tk.Label(self.top, text="(0/100 character)", font=("Noto Sans Regular", convert_size(window, 11)))
+        self.note_len.grid(row=2, column=0, pady=10)
 
+        self.note_Entry.bind('<KeyPress>', self.updateLength)
+        self.note_Entry.bind('<KeyRelease>', self.updateLength)
 
         # ---Confirm button---
         self.confirm_btn = tk.Button(self.top, text="Confirm", font=convert_size(window, 15),
                                      command=self.confirm_and_out, relief="ridge")
-        self.confirm_btn.grid(row=2, column=0, pady=20)
+        self.confirm_btn.grid(row=3, column=0, pady=20)
 
         # ------
 
+    def updateLength(self, event):
+        if len(self.note_Entry.get("1.0", "end-1c")) > 100:
+            self.note_len.config(text="(Maximum length !)")
+            oldNote = self.note_Entry.get("1.0", "end-2c")
+            print(oldNote)
+            self.note_Entry.delete("1.0", "end-1c")
+            self.note_Entry.insert("1.0",oldNote)
+        else:
+            self.note_len.config(text="(" + str(len(self.note_Entry.get("1.0", "end-1c"))) + "/100 character)")
+
     def confirm_and_out(self):
         self.note_input = self.note_Entry.get("1.0", "end-1c") # Lấy nội dung từ đầu tới cuối
+        print(self.note_input)
         self.top.destroy()
 
 

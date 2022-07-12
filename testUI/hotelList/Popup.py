@@ -21,11 +21,16 @@ class popup_window(object):
                                     font=("Noto Sans Bold", 14))
         self.note_Entry.grid(row=1, column=0, pady=20)
 
+        # -- Length -- #
+        self.note_len = Label(self.top, text="(0/100 character)", font=("Noto Sans Regular", 11))
+        self.note_len.grid(row=2, column=0, pady=10)
 
+        self.note_Entry.bind('<KeyPress>', self.updateLength)
+        self.note_Entry.bind('<KeyRelease>', self.updateLength)
         # ---Confirm button---
         self.confirm_btn = Button(self.top, text="Confirm", font=15,
                                      command=self.confirmAndOut, relief="ridge")
-        self.confirm_btn.grid(row=2, column=0, pady=20)
+        self.confirm_btn.grid(row=3, column=0, pady=20)
         # self.departDate = None
         # self.arrivalDate = None
 
@@ -101,6 +106,16 @@ class popup_window(object):
     #         self.departLabel.config(text="You haven't chosen Departure Date")
     #         return
     #     self.top.destroy()
+
+    def updateLength(self, event):
+        if len(self.note_Entry.get("1.0", "end-1c")) > 100:
+            self.note_len.config(text="(Maximum length !)")
+            oldNote = self.note_Entry.get("1.0", "end-2c")
+            print(oldNote)
+            self.note_Entry.delete("1.0", "end-1c")
+            self.note_Entry.insert("1.0",oldNote)
+        else:
+            self.note_len.config(text="(" + str(len(self.note_Entry.get("1.0", "end-1c"))) + "/100 character)")
     
     def confirmAndOut(self):
         self.noteInput = self.note_Entry.get("1.0", "end-1c") # Lấy nội dung từ đầu tới cuối
