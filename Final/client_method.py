@@ -214,7 +214,7 @@ def CanCancel(time_to_check: str):
     return False
 
 
-def Booking(client, username, booking_list):
+def Booking(client, username, booking_list, note_input):
     send_s(client, OPTIONS['booking'])
     send_s(client, username)
     rows = []
@@ -231,7 +231,8 @@ def Booking(client, username, booking_list):
                      "Price": booking_room['Price'],
                      "Quantity": booking_room['Quantity'],
                      "Max": booking_room['Max'],
-                     "Total": booking_room['Total']})
+                     "Total": booking_room['Total'],
+                     "Note": note_input})
 
     data = json.dumps(rows)
     send_s(client, str(len(data)))

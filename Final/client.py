@@ -451,7 +451,7 @@ class MenuFrame(tk.Frame):
 
 
 class CardHotelFrame(tk.Frame):
-    def __init__(self, parent, controller, window, column, card_name, card_description, card_status,
+    def __init__(self, parent, controller, window, column, card_name, card_description,
                  card_thumbnail, hotel_page):
         tk.Frame.__init__(self, parent)
         self.popup_screen = None
@@ -479,7 +479,6 @@ class CardHotelFrame(tk.Frame):
         self.column = column
         self.card_name = card_name
         self.card_description = card_description
-        self.card_status = card_status
         self.thumbnail = card_thumbnail
         # ------
         self.__create_widgets(window)
@@ -592,7 +591,7 @@ class HotelPageFrame(tk.Frame):
         for i in self.hotels:
             self.cards[i['ID']] = CardHotelFrame(self, controller, window, i['ID'], i['NAME'],
                                                  i['DESC'],
-                                                 int(i['AVAILABLE']), i['IMG'], self.page_number)
+                                                 i['IMG'], self.page_number)
             self.cards[i['ID']].place(x=self.first_card_x + self.card_discrepancy * column, y=self.first_card_y,
                                       width=self.card_width, height=self.card_height)
             column += 1
@@ -661,15 +660,15 @@ class HotelListFrame(tk.Frame):
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
-        tk.Label(master=self, 
+        tk.Label(master=self,
                  text=f"{self.controller.username}",
                  anchor="e",
                  justify=tk.RIGHT,
-                 font=("Noto Sans SemiBold", 20), 
+                 font=("Noto Sans SemiBold", 20),
                  background="#ffffff").place(
-                                        x=convert_size(controller, 1530),
-                                        y=convert_size(controller, 70),
-                                        anchor="e")
+            x=convert_size(controller, 1530),
+            y=convert_size(controller, 70),
+            anchor="e")
 
         self.go_to_page(self.begin_page)
 
@@ -1139,6 +1138,7 @@ class CartPageFrame(tk.Frame):
     """Container for info frame & item frame of CART PAGE"""
 
     def __init__(self, parent, controller, window, reserve_list):
+        self.popup_screen = None
         self.tax = 0
         self.sub_total = 0
         self.controller = controller
@@ -1285,8 +1285,11 @@ class CartPageFrame(tk.Frame):
                                width=convert_size(self.window, 455), height=convert_size(self.window, 87))
 
     def Confirm_Clicked(self, window):
+        self.popup_screen = NotePopup(self, window)
+        self.wait_window(self.popup_screen.top)
+
         if len(window.booking_list):
-            ok = Booking(client, window.username, window.booking_list)
+            ok = Booking(client, window.username, window.booking_list, self.NoteValue())
             if ok:
                 messagebox.showinfo("Booking", "Finish")
                 window.booking_list = []
@@ -1298,6 +1301,9 @@ class CartPageFrame(tk.Frame):
                 window.show_frame("MenuFrame")
             else:
                 messagebox.showinfo("Booking", "Fail")
+
+    def NoteValue(self):
+        return self.popup_screen.note_input
 
     def Update_Total(self):
         self.sub_total = 0
@@ -1518,26 +1524,26 @@ class ReservationPageFrame(tk.Frame):
 class NotePopup:
     def __init__(self, master, window):
 
+        self.note_input = None
         self.top = tk.Toplevel(master)
         # print("Pop up")
 
-
         # --Title--
-        self.note_title = tk.Label(self.top, 
+        self.note_title = tk.Label(self.top,
                                    text="Any note ?",
                                    font=("Noto Sans Bold", convert_size(window, 16)))
         self.note_title.grid(row=0, column=0, pady=10)
 
-
         # --Entry--
-        self.note_Entry = tk.Text(self.top, 
-                                    width=50, # Số kí tự trong 1 dòng (~line wrap)
-                                    height=5, # Số dòng mà khung hiển thị
-                                    font=("Noto Sans Bold", convert_size(window, 13)))
+        self.note_Entry = tk.Text(self.top,
+                                  width=50,  # Số kí tự trong 1 dòng (~line wrap)
+                                  height=5,  # Số dòng mà khung hiển thị
+                                  font=("Noto Sans Bold", convert_size(window, 13)))
         self.note_Entry.grid(row=1, column=0, pady=20)
 
         # -- Length -- #
-        self.note_len = tk.Label(self.top, text="(0/100 character)", font=("Noto Sans Regular", convert_size(window, 11)))
+        self.note_len = tk.Label(self.top, text="(0/100 character)",
+                                 font=("Noto Sans Regular", convert_size(window, 11)))
         self.note_len.grid(row=2, column=0, pady=10)
 
         self.note_Entry.bind('<KeyPress>', self.updateLength)
@@ -1556,21 +1562,14 @@ class NotePopup:
             oldNote = self.note_Entry.get("1.0", "end-2c")
             print(oldNote)
             self.note_Entry.delete("1.0", "end-1c")
-            self.note_Entry.insert("1.0",oldNote)
+            self.note_Entry.insert("1.0", oldNote)
         else:
             self.note_len.config(text="(" + str(len(self.note_Entry.get("1.0", "end-1c"))) + "/100 character)")
 
     def confirm_and_out(self):
-        self.note_input = self.note_Entry.get("1.0", "end-1c") # Lấy nội dung từ đầu tới cuối
+        self.note_input = self.note_Entry.get("1.0", "end-1c")  # Lấy nội dung từ đầu tới cuối
         print(self.note_input)
         self.top.destroy()
-
-
-
-
-
-
-
 
 
 class GuidePageFrame(tk.Frame):

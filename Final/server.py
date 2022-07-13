@@ -155,8 +155,8 @@ def SendHotelList(conn, addr, sqlConn: sqlite3.Connection):
             rows.append(
                 dict(ID=row['ID'],
                      NAME=row['NAME'],
-                     DESC=row['DESC'],
-                     AVAILABLE=row['AVAILABLE']))
+                     DESC=row['DESC']
+                    ))
             print(type(row['IMG']))
             images.append(row['IMG'])
 
@@ -191,7 +191,7 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
 
         cx.execute(
             f"""select RESERVATION.TIMESTAMP, HOTEL.NAME, RESERVATION.HOTEL_ID, RESERVATION.ROOM_ID, ROOM.TYPE, ROOM.PRICE, ROOM.VACANCIES, ROOM.IMG,
-            RESERVATION.QUALITY, RESERVATION.ARRIVAL, RESERVATION.DEPARTURE, RESERVATION.TOTAL 
+            RESERVATION.QUANTITY, RESERVATION.ARRIVAL, RESERVATION.DEPARTURE, RESERVATION.TOTAL 
             from RESERVATION, HOTEL, ROOM 
             where RESERVATION.USERNAME = '{username}' and 
             RESERVATION.HOTEL_ID = HOTEL.ID and
@@ -209,7 +209,7 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
                      TYPE=row['TYPE'],
                      PRICE=row['PRICE'],
                      VACANCIES=row['VACANCIES'],
-                     QUANTITY=row['QUALITY'],
+                     QUANTITY=row['QUANTITY'],
                      ARRIVAL=row['ARRIVAL'],
                      DEPARTURE=row['DEPARTURE'],
                      TOTAL=row['TOTAL']))
@@ -293,7 +293,7 @@ def SendRoomList(conn, addr, sqlConn: sqlite3.Connection):
             images.append(row['IMG'])
 
         cx.execute(
-            """select RESERVATION.ROOM_ID, RESERVATION.QUALITY, RESERVATION.ARRIVAL, RESERVATION.DEPARTURE
+            """select RESERVATION.ROOM_ID, RESERVATION.QUANTITY, RESERVATION.ARRIVAL, RESERVATION.DEPARTURE
                       from RESERVATION, HOTEL
                       where RESERVATION.HOTEL_ID = HOTEL.ID""")
         reservations = [dict(row) for row in cx]
@@ -339,7 +339,7 @@ def BookingRoom(conn, sqlConn: sqlite3.Connection):
         booking_list = json.loads(data)
 
         timestamp = datetime.datetime.now().replace(microsecond=0).timestamp()
-        insert_cmd = "insert into RESERVATION values (?, ?, ?, ?, ?, ?, ?, ?)"
+        insert_cmd = "insert into RESERVATION values (?, ?, ?, ?, ?, ?, ?, ?, ?)"
         for booking in booking_list:
             booking["Arrival"] = datetime.datetime.strptime(
                 booking["Arrival"], "%d/%m/%Y").timestamp()
@@ -359,7 +359,7 @@ def BookingRoom(conn, sqlConn: sqlite3.Connection):
             cx.execute(insert_cmd,
                        (timestamp, username, hotel_id, booking['ID'],
                         booking['Quantity'], booking['Arrival'],
-                        booking['Depart'], booking['Total']))
+                        booking['Depart'], booking['Total'], booking['Note']))
 
         sqlConn.commit()
         send_s(conn, "Finish")
