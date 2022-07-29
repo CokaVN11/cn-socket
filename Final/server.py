@@ -5,6 +5,7 @@ import json
 import datetime
 
 IP = socket.gethostbyname(socket.gethostname())
+# IP = "192.168.27.35"
 PORT = 27278
 ADDR = (IP, PORT)
 BUFSIZ = 1024
@@ -152,11 +153,7 @@ def SendHotelList(conn, addr, sqlConn: sqlite3.Connection):
         images = []
 
         for row in cx:
-            rows.append(
-                dict(ID=row['ID'],
-                     NAME=row['NAME'],
-                     DESC=row['DESC']
-                    ))
+            rows.append(dict(ID=row['ID'], NAME=row['NAME'], DESC=row['DESC']))
             print(type(row['IMG']))
             images.append(row['IMG'])
 
@@ -169,10 +166,15 @@ def SendHotelList(conn, addr, sqlConn: sqlite3.Connection):
             conn.sendall(data.encode(FORMAT))
             for img in images:
                 len_data = len(img)
-                print(len_data)
                 send_s(conn, str(len_data))
                 conn.sendall(img)
-                recv_s(conn)
+                len_recv = int(recv_s(conn))
+
+                while (len_recv != len_data):
+                    len_data = len(img)
+                    send_s(conn, str(len_data))
+                    conn.sendall(img)
+                    len_recv = int(recv_s(conn))
             # conn.sendall(data)
         else:
             data = "empty"
@@ -236,6 +238,13 @@ def SendBookedList(conn, addr, sqlConn: sqlite3.Connection):
                 len_data = len(img)
                 send_s(conn, str(len_data))
                 conn.sendall(img)
+                len_recv = int(recv_s(conn))
+
+                while (len_recv != len_data):
+                    len_data = len(img)
+                    send_s(conn, str(len_data))
+                    conn.sendall(img)
+                    len_recv = int(recv_s(conn))
 
         else:
             data = "empty"
@@ -323,8 +332,16 @@ def SendRoomList(conn, addr, sqlConn: sqlite3.Connection):
             send_s(conn, str(len(data)))
             conn.sendall(data.encode(FORMAT))
             for img in images:
-                send_s(conn, str(len(img)))
+                len_data = len(img)
+                send_s(conn, str(len_data))
                 conn.sendall(img)
+                len_recv = int(recv_s(conn))
+
+                while (len_recv != len_data):
+                    len_data = len(img)
+                    send_s(conn, str(len_data))
+                    conn.sendall(img)
+                    len_recv = int(recv_s(conn))
         cx.close()
 
 
