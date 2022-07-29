@@ -303,145 +303,148 @@ def combine_room(sqlConn: sql.Connection):
 #         print("SQLite connection closed")
 # -----------
 
-deleteUsernameInvalid("USER")
+# deleteUsernameInvalid("USER")
 
-# try:
-#     sqlConn = sql.connect(DB)
-#     sqlConn.row_factory = sql.Row
+try:
+    sqlConn = sql.connect(DB)
+    sqlConn.row_factory = sql.Row
 
-#     sqlConn.execute("PRAGMA foreign_keys=1")
+    sqlConn.execute("PRAGMA foreign_keys=1")
+    sqlConn.execute("PRAGMA auto_vacuum=1")
 
-#     cx = sqlConn.cursor()
+    cx = sqlConn.cursor()
 
-#     cx.execute("""CREATE TABLE IF NOT EXISTS USER
-#         (USERNAME TEXT PRIMARY KEY,
-#         PASSWORD TEXT NOT NULL,
-#         BANK INTEGER NOT NULL
-#         )
-#     """)
+    cx.execute("""CREATE TABLE IF NOT EXISTS USER
+        (USERNAME TEXT PRIMARY KEY,
+        PASSWORD TEXT NOT NULL,
+        BANK INTEGER NOT NULL
+        )
+    """)
 
-#     # cx.execute("DROP TABLE HOTEL")
-#     cx.execute("""CREATE TABLE IF NOT EXISTS HOTEL
-#         (ID INTEGER PRIMARY KEY AUTOINCREMENT,
-#         NAME TEXT NOT NULL,
-#         DESC TEXT,
-#         AVAILABLE INTEGER NOT NULL)
-#     """)
+    # cx.execute("DROP TABLE HOTEL")
+    cx.execute("""CREATE TABLE IF NOT EXISTS HOTEL
+        (ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        NAME TEXT NOT NULL,
+        DESC TEXT,
+        AVAILABLE INTEGER NOT NULL)
+    """)
 
-#     # cx.execute("DROP TABLE ROOM")
-#     cx.execute("""CREATE TABLE IF NOT EXISTS ROOM
-#         (ID INTEGER PRIMARY KEY AUTOINCREMENT,
-#         HOTEL_ID INTEGER NOT NULL,
-#         TYPE TEXT NOT NULL,
-#         DESC TEXT,
-#         VACANCIES INTEGER NOT NULL,
-#         PRICE INTEGER NOT NULL,
-#         FOREIGN KEY (HOTEL_ID) REFERENCES HOTEL(ID))
-#     """)
+    # cx.execute("DROP TABLE ROOM")
+    cx.execute("""CREATE TABLE IF NOT EXISTS ROOM
+        (ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        HOTEL_ID INTEGER NOT NULL,
+        TYPE TEXT NOT NULL,
+        DESC TEXT,
+        VACANCIES INTEGER NOT NULL,
+        PRICE INTEGER NOT NULL,
+        FOREIGN KEY (HOTEL_ID) REFERENCES HOTEL(ID))
+    """)
 
-#     cx.execute("""CREATE TABLE IF NOT EXISTS RESERVATION
-#         (TIMESTAMP TEXT NOT NULL,
-#         USERNAME TEXT NOT NULL,
-#         HOTEL_ID INTEGER NOT NULL,
-#         ROOM_ID INTEGER NOT NULL,
-#         QUALITY INTEGER NOT NULL,
-#         ARRIVAL TEXT NOT NULL,
-#         DEPARTURE TEXT NOT NULL,
-#         TOTAL INTEGER NOT NULL,
-#         FOREIGN KEY (USERNAME) REFERENCES USER(USERNAME),
-#         FOREIGN KEY (HOTEL_ID) REFERENCES HOTEL(ID),
-#         FOREIGN KEY (ROOM_ID) REFERENCES ROOM(ID)
-#         )
-#     """)
+    cx.execute("""CREATE TABLE IF NOT EXISTS RESERVATION
+        (TIMESTAMP TEXT NOT NULL,
+        USERNAME TEXT NOT NULL,
+        HOTEL_ID INTEGER NOT NULL,
+        ROOM_ID INTEGER NOT NULL,
+        QUALITY INTEGER NOT NULL,
+        ARRIVAL TEXT NOT NULL,
+        DEPARTURE TEXT NOT NULL,
+        TOTAL INTEGER NOT NULL,
+        FOREIGN KEY (USERNAME) REFERENCES USER(USERNAME),
+        FOREIGN KEY (HOTEL_ID) REFERENCES HOTEL(ID),
+        FOREIGN KEY (ROOM_ID) REFERENCES ROOM(ID)
+        )
+    """)
 
-#     # user = ("kn110", "123", "1234567890")
-#     # cx.execute("INSERT INTO USER VALUES (?, ?, ?)", user)
+    # user = ("kn110", "123", "1234567890")
+    # cx.execute("INSERT INTO USER VALUES (?, ?, ?)", user)
 
-#     # hotel = ("H1", "Hotel 1", "Normal", 10, 10, 100)
-#     # cx.execute("INSERT INTO HOTEL VALUES (?, ?, ?, ?, ?, ?)",  hotel)
+    # hotel = ("H1", "Hotel 1", "Normal", 10, 10, 100)
+    # cx.execute("INSERT INTO HOTEL VALUES (?, ?, ?, ?, ?, ?)",  hotel)
 
-#     # str_today = datetime.datetime.now().replace(microsecond=0)
-#     # timestamp = datetime.datetime.timestamp(str_today)
-#     # # str_fromtimestamp = datetime.datetime.fromtimestamp(timestamp)
-#     # # print(str_today)
-#     # # print(timestamp)
-#     #
-#     # # insert_cmd = "INSERT INTO HOTEL (NAME, DESC, AVAILABLE) VALUES (?,?,?)"
-#     # # for name in hotel_names:
-#     # #     hotel = (name, "Choose me", 1)
-#     # #     cx.execute(insert_cmd, hotel)
-#     #
-#     # # insert_room(sqlConn)
-#     # # print("a")
-#     # # combine_room(sqlConn)
-#     #
-#     # # rows = cx.fetchall()
-#     # # for row in rows:
-#     # #     print(row)
-#     # insert_cmd = "insert into RESERVATION values (?, ?, ?, ?, ?, ?, ?, ?)"
-#     # arrival = "15/07/2022"
-#     # arrival_ts = datetime.datetime.strptime(arrival, "%d/%m/%Y").timestamp()
-#     # departure = "16/07/2022"
-#     # departure_ts = datetime.datetime.strptime(departure, "%d/%m/%Y").timestamp()
-#     # username = "kn110"
-#     # hotel_id = "2"
-#     # room_id = "3"
-#     # quality = 2
-#     # room = cx.execute(f"select * from ROOM where HOTEL_ID = {hotel_id} and ID = {room_id}").fetchone()
-#     # # #
-#     # # # update_cmd = f"""update ROOM
-#     # # # set VACANCIES = {room['VACANCIES'] - quality}
-#     # # # where HOTEL_ID = 1 and ID = 1
-#     # # # """
-#     # # # cx.execute(update_cmd)
-#     # # #
-#     # total = quality * room['PRICE']
-#     # reservation = (timestamp, username, hotel_id, room_id, quality, arrival_ts, departure_ts, total)
-#     # print(reservation)
-#     # cx.execute(insert_cmd, reservation)
-#     # cx.execute("""update ROOM set VACANCIES = 2 where ID = 1""")
-#     # print(arrival_ts, departure_ts)
-#     # cx.execute(f"""update RESERVATION set DEPARTURE = {str(departure_ts)} where TOTAL = 200""")
+    # str_today = datetime.datetime.now().replace(microsecond=0)
+    # timestamp = datetime.datetime.timestamp(str_today)
+    # # str_fromtimestamp = datetime.datetime.fromtimestamp(timestamp)
+    # # print(str_today)
+    # # print(timestamp)
+    #
+    # # insert_cmd = "INSERT INTO HOTEL (NAME, DESC, AVAILABLE) VALUES (?,?,?)"
+    # # for name in hotel_names:
+    # #     hotel = (name, "Choose me", 1)
+    # #     cx.execute(insert_cmd, hotel)
+    #
+    # # insert_room(sqlConn)
+    # # print("a")
+    # # combine_room(sqlConn)
+    #
+    # # rows = cx.fetchall()
+    # # for row in rows:
+    # #     print(row)
+    # insert_cmd = "insert into RESERVATION values (?, ?, ?, ?, ?, ?, ?, ?)"
+    # arrival = "15/07/2022"
+    # arrival_ts = datetime.datetime.strptime(arrival, "%d/%m/%Y").timestamp()
+    # departure = "16/07/2022"
+    # departure_ts = datetime.datetime.strptime(departure, "%d/%m/%Y").timestamp()
+    # username = "kn110"
+    # hotel_id = "2"
+    # room_id = "3"
+    # quality = 2
+    # room = cx.execute(f"select * from ROOM where HOTEL_ID = {hotel_id} and ID = {room_id}").fetchone()
+    # # #
+    # # # update_cmd = f"""update ROOM
+    # # # set VACANCIES = {room['VACANCIES'] - quality}
+    # # # where HOTEL_ID = 1 and ID = 1
+    # # # """
+    # # # cx.execute(update_cmd)
+    # # #
+    # total = quality * room['PRICE']
+    # reservation = (timestamp, username, hotel_id, room_id, quality, arrival_ts, departure_ts, total)
+    # print(reservation)
+    # cx.execute(insert_cmd, reservation)
+    # cx.execute("""update ROOM set VACANCIES = 2 where ID = 1""")
+    # print(arrival_ts, departure_ts)
+    # cx.execute(f"""update RESERVATION set DEPARTURE = {str(departure_ts)} where TOTAL = 200""")
 
-#     # cx.execute("""alter table HOTEL
-#     # add column IMG blob;""")
+    # cx.execute("""alter table HOTEL
+    # add column IMG blob;""")
 
-#     for i in range(1, 11):
-#         path_img = f"./server/hotel{i} (Small).jpg"
-#         size_img = path.getsize(path_img)
-#         img = open(path_img, "rb")
-#         data = img.read(size_img)
-#         cx.execute(f"update HOTEL set IMG = (?) where ID = {i}", (data,))
-#         print(path_img)
-#         img.close()
-#     # images = cx.execute("""select IMG from HOTEL""").fetchall()
-#     # for img in images:
-#     #     image = Image.open(io.BytesIO(img[0]))
-#     #     image.show()
-#     #     # input("Wait: ")
+    # for i in range(1, 11):
+    #     path_img = f"./server/hotel{i} (Small).jpg"
+    #     size_img = path.getsize(path_img)
+    #     img = open(path_img, "rb")
+    #     data = img.read(size_img)
+    #     cx.execute(f"update HOTEL set IMG = (?) where ID = {i}", (data, ))
+    #     print(path_img)
+    #     img.close()
+    # images = cx.execute("""select IMG from HOTEL""").fetchall()
+    # for img in images:
+    #     image = Image.open(io.BytesIO(img[0]))
+    #     image.show()
+    #     # input("Wait: ")
 
-#     # cx.execute("""alter table ROOM add column IMG blob;""")
+    # cx.execute("""alter table ROOM add column IMG blob;""")
 
-#     # for i in range(1, 22):
-#     #     path_img = f"./server/{i}.jpg"
-#     #     size_img = path.getsize(path_img)
-#     #     img = open(path_img, "rb")
-#     #     data = img.read(size_img)
-#     #     cx.execute(f"update ROOM set IMG = (?) where ID = {i}", (data, ))
-#     #     img.close()
+    # for i in range(1, 22):
+    #     path_img = f"./server/{i} (Small).jpg"
+    #     size_img = path.getsize(path_img)
+    #     img = open(path_img, "rb")
+    #     data = img.read(size_img)
+    #     cx.execute(f"update ROOM set IMG = (?) where ID = {i}", (data, ))
+    #     img.close()
 
-#     # cx.execute(
-#     #     """update HOTEL
-#     #            set DESC = (?) where rowid = 10""",
-#     #     ("Wondel Koll, welcomes you in a real cosmopolitan, pulsing milieu, at the same time offering peace and intimate retirement, just in the heart of the city centre. Timeless elegance tailored for the demands of our time.",
-#     #      ))
+    # cx.execute(
+    #     """update HOTEL
+    #            set DESC = (?) where rowid = 10""",
+    #     ("Wondel Koll, welcomes you in a real cosmopolitan, pulsing milieu, at the same time offering peace and intimate retirement, just in the heart of the city centre. Timeless elegance tailored for the demands of our time.",
+    #      ))
 
-#     sqlConn.commit()
-#     cx.close()
+    # cx.execute("""alter table RESERVATION add column NOTE text""")
+    cx.execute("VACUUM")
+    sqlConn.commit()
+    cx.close()
 
-# except sql.Error as error:
-#     print(f"Error occurred {error}")
-# finally:
-#     if sqlConn:
-#         sqlConn.close()
-#         print("SQLite connection closed")
+except sql.Error as error:
+    print(f"Error occurred {error}")
+finally:
+    if sqlConn:
+        sqlConn.close()
+        print("SQLite connection closed")

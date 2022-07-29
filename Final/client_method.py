@@ -30,7 +30,7 @@ def send_s(conn: socket.socket(), msg: str):
 def recv_s(conn: socket.socket()):
     if conn:
         msg = conn.recv(BUFSIZ)
-        print(msg)
+        # print(msg)
         msg = msg.decode(FORMAT)
         conn.sendall(msg.encode(FORMAT))
         return msg
@@ -143,20 +143,16 @@ def ShowHotelList(client):
 
     for hotel in hotels:
         len_data = int(recv_s(client))
-        print(len_data)
-        img = client.recv(len_data)
-        send_s(client, "1")
-        hotel['IMG'] = img
-    # first = True
-    # for hotel in hotels:
-    #     if not first:
-    #         print("-" * 10)
-    #     else:
-    #         first = False
-    #     print(f"ID: {hotel['ID']}")
-    #     print(f"Name: {hotel['NAME']}")
-    #     print(f"Description: {hotel['DESC']}")
-    #     print(f"Is available: {hotel['AVAILABLE']}")
+        hotel['IMG'] = client.recv(len_data)
+        len_recv = len(hotel['IMG'])
+        send_s(client, str(len_recv))
+
+        while (len_recv != len_data):
+            len_data = int(recv_s(client))
+            hotel['IMG'] = client.recv(len_data)
+            len_recv = len(hotel['IMG'])
+            send_s(client, str(len_recv))
+
     return hotels
 
 
@@ -173,6 +169,14 @@ def ShowBooked(client, username):
     for reserve in reservations:
         len_data = int(recv_s(client))
         reserve['IMG'] = client.recv(len_data)
+        len_recv = len(reserve['IMG'])
+        send_s(client, str(len_recv))
+
+        while (len_recv != len_data):
+            len_data = int(recv_s(client))
+            reserve['IMG'] = client.recv(len_data)
+            len_recv = len(reserve['IMG'])
+            send_s(client, str(len_recv))
     return reservations
 
 
@@ -194,6 +198,14 @@ def LookUpRoom(client, hotel_name, arrival_date, depart_date):
     for room in rooms:
         len_data = int(recv_s(client))
         room['IMG'] = client.recv(len_data)
+        len_recv = len(room['IMG'])
+        send_s(client, str(len_recv))
+
+        while (len_recv != len_data):
+            len_data = int(recv_s(client))
+            room['IMG'] = client.recv(len_data)
+            len_recv = len(room['IMG'])
+            send_s(client, str(len_recv))
 
     return rooms
 
@@ -206,7 +218,8 @@ def GetMoneyStaying(arrival: str, depart: str, price: int):
 
 
 def CanCancel(time_to_check: str):
-    time_to_check = datetime.datetime.strptime(time_to_check, "%d/%m/%Y %H:%M:%S")
+    time_to_check = datetime.datetime.strptime(time_to_check,
+                                               "%d/%m/%Y %H:%M:%S")
     time_now = datetime.datetime.now()
     delta = time_now - time_to_check
     if delta.days <= 1:
@@ -220,19 +233,21 @@ def Booking(client, username, booking_list, note_input):
     rows = []
 
     for booking_room in booking_list:
-        booking_room['Total'] = booking_room['Quantity'] * GetMoneyStaying(booking_room['Arrival'],
-                                                                           booking_room['Depart'],
-                                                                           booking_room['Price'])
-        rows.append({"ID": booking_room['ID'],
-                     "Hotel Name": booking_room['Hotel Name'],
-                     "Room type": booking_room['Room type'],
-                     "Arrival": booking_room['Arrival'],
-                     "Depart": booking_room['Depart'],
-                     "Price": booking_room['Price'],
-                     "Quantity": booking_room['Quantity'],
-                     "Max": booking_room['Max'],
-                     "Total": booking_room['Total'],
-                     "Note": note_input})
+        booking_room['Total'] = booking_room['Quantity'] * GetMoneyStaying(
+            booking_room['Arrival'], booking_room['Depart'],
+            booking_room['Price'])
+        rows.append({
+            "ID": booking_room['ID'],
+            "Hotel Name": booking_room['Hotel Name'],
+            "Room type": booking_room['Room type'],
+            "Arrival": booking_room['Arrival'],
+            "Depart": booking_room['Depart'],
+            "Price": booking_room['Price'],
+            "Quantity": booking_room['Quantity'],
+            "Max": booking_room['Max'],
+            "Total": booking_room['Total'],
+            "Note": note_input
+        })
 
     data = json.dumps(rows)
     send_s(client, str(len(data)))
@@ -243,7 +258,8 @@ def Booking(client, username, booking_list, note_input):
     return msg == "Finish"
 
 
-def CancelReservation(client, username, hotel_id, room_id, time_stamp, arrival_date, depart_date):
+def CancelReservation(client, username, hotel_id, room_id, time_stamp,
+                      arrival_date, depart_date):
     send_s(client, OPTIONS['cancel'])
     send_s(client, username)
     send_s(client, str(hotel_id))
@@ -257,5 +273,6 @@ def CancelReservation(client, username, hotel_id, room_id, time_stamp, arrival_d
 
 
 def GetStrNow():
-    time_now = datetime.datetime.now().replace(microsecond=0).strftime("%d/%m/%Y %H:%M:%S")
+    time_now = datetime.datetime.now().replace(
+        microsecond=0).strftime("%d/%m/%Y %H:%M:%S")
     return time_now
