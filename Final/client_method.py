@@ -4,6 +4,7 @@ import re
 import json
 
 IP = socket.gethostbyname(socket.gethostname())
+# IP = "192.168.27.35"
 PORT = 27278
 ADDR = (IP, PORT)
 BUFSIZ = 1024
